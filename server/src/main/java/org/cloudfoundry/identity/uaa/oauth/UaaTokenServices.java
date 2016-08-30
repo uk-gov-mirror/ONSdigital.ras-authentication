@@ -92,6 +92,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.cloudfoundry.identity.uaa.oauth.token.ClaimConstants.ADDITIONAL_AZ_ATTR;
+import static org.cloudfoundry.identity.uaa.oauth.token.ClaimConstants.AMR;
 import static org.cloudfoundry.identity.uaa.oauth.token.ClaimConstants.AUD;
 import static org.cloudfoundry.identity.uaa.oauth.token.ClaimConstants.AUTHORITIES;
 import static org.cloudfoundry.identity.uaa.oauth.token.ClaimConstants.AUTH_TIME;
@@ -319,7 +320,7 @@ public class UaaTokenServices implements AuthorizationServerTokenServices, Resou
                 false,
                 null,  //TODO populate response types
                 null,
-                revocable);
+                revocable, null);
 
         DefaultExpiringOAuth2RefreshToken expiringRefreshToken = new DefaultExpiringOAuth2RefreshToken(refreshTokenValue, new Date(refreshTokenExpireDate));
         return persistRevocableToken(accessTokenId, refreshTokenId, accessToken, expiringRefreshToken, clientId, user.getId(), opaque, revocable);
@@ -390,7 +391,7 @@ public class UaaTokenServices implements AuthorizationServerTokenServices, Resou
                                                    boolean forceIdTokenCreation,
                                                    Set<String> externalGroupsForIdToken,
                                                    Map<String, List<String>> userAttributesForIdToken,
-                                                   boolean revocable) throws AuthenticationException {
+                                                   boolean revocable, Set<String> authenticationMethods) throws AuthenticationException {
         CompositeAccessToken accessToken = new CompositeAccessToken(tokenId);
         accessToken.setExpiration(new Date(System.currentTimeMillis() + (validitySeconds * 1000L)));
         accessToken.setRefreshToken(refreshToken == null ? null : new DefaultOAuth2RefreshToken(refreshToken));
@@ -438,7 +439,7 @@ public class UaaTokenServices implements AuthorizationServerTokenServices, Resou
         String token = JwtHelper.encode(content, KeyInfo.getActiveKey().getSigner()).getEncoded();
         // This setter copies the value and returns. Don't change.
         accessToken.setValue(token);
-        populateIdToken(accessToken, jwtAccessToken, requestedScopes, responseTypes, clientId, forceIdTokenCreation, externalGroupsForIdToken, user, userAttributesForIdToken);
+        populateIdToken(accessToken, jwtAccessToken, requestedScopes, responseTypes, clientId, forceIdTokenCreation, externalGroupsForIdToken, user, userAttributesForIdToken, authenticationMethods);
         publish(new TokenIssuedEvent(accessToken, SecurityContextHolder.getContext().getAuthentication()));
 
         return accessToken;
@@ -452,7 +453,7 @@ public class UaaTokenServices implements AuthorizationServerTokenServices, Resou
                                  boolean forceIdTokenCreation,
                                  Set<String> externalGroupsForIdToken,
                                  UaaUser user,
-                                 Map<String,List<String>> userAttributesForIdToken) {
+                                 Map<String, List<String>> userAttributesForIdToken, Set<String> authenticationMethods) {
         if (forceIdTokenCreation || (scopes.contains("openid") && responseTypes.contains(CompositeAccessToken.ID_TOKEN))) {
             try {
                 Map<String, Object> clone = new HashMap<>(accessTokenValues);
@@ -462,6 +463,9 @@ public class UaaTokenServices implements AuthorizationServerTokenServices, Resou
                     if (validIdTokenScopes!=null && validIdTokenScopes.contains(sc)) {
                         idTokenScopes.add(sc);
                     }
+                }
+                if (authenticationMethods != null) {
+                    clone.put(AMR, authenticationMethods);
                 }
                 clone.put(SCOPE, idTokenScopes);
                 clone.put(AUD, new HashSet(Arrays.asList(aud)));
@@ -577,6 +581,7 @@ public class UaaTokenServices implements AuthorizationServerTokenServices, Resou
         UaaUser user = null;
         boolean wasIdTokenRequestedThroughAuthCodeScopeParameter = false;
         Collection<GrantedAuthority> clientScopes = null;
+        Set<String> authenticationMethods = null;
         // Clients should really by different kinds of users
         if (authentication.isClientOnly()) {
             ClientDetails client = clientDetailsService.loadClientByClientId(authentication.getName());
@@ -586,6 +591,7 @@ public class UaaTokenServices implements AuthorizationServerTokenServices, Resou
             user = userDatabase.retrieveUserById(userId);
             if (authentication.getUserAuthentication() instanceof UaaAuthentication) {
                 userAuthenticationTime = new Date(((UaaAuthentication)authentication.getUserAuthentication()).getAuthenticatedTime());
+                authenticationMethods = ((UaaAuthentication) authentication.getUserAuthentication()).getAuthenticationMethods();
             }
         }
 
@@ -665,7 +671,8 @@ public class UaaTokenServices implements AuthorizationServerTokenServices, Resou
                 wasIdTokenRequestedThroughAuthCodeScopeParameter,
                 externalGroupsForIdToken,
                 userAttributesForIdToken,
-                revocable);
+                revocable,
+                authenticationMethods);
 
         return persistRevocableToken(tokenId, refreshTokenId, accessToken, refreshToken, clientId, userId, opaque, revocable);
     }
