@@ -24,7 +24,6 @@ import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.security.web.util.UrlUtils;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.Filter;
@@ -40,7 +39,6 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -129,17 +127,7 @@ public class UaaSavedRequestCache extends HttpSessionRequestCache implements Fil
         public ClientRedirectSavedRequest(HttpServletRequest request, String redirectUrl) {
             super(request, req -> req.getServerPort());
             this.redirectUrl = redirectUrl;
-            MultiValueMap<String, String> map = UaaUrlUtils.getParameterMap(redirectUrl);
-            Map<String, String[]> parammap = new HashMap<>();
-            map
-                .entrySet()
-                .stream()
-                .forEach(
-                    e ->
-                        parammap.put(e.getKey(),
-                                     e.getValue() == null ? null : e.getValue().toArray(new String[0]))
-            );
-            parameters = Collections.unmodifiableMap(parammap);
+            parameters = Collections.unmodifiableMap(UaaUrlUtils.getParameterMap(redirectUrl));
         }
 
         @Override
