@@ -101,6 +101,7 @@ public class UaaSavedRequestCacheTests {
     public void filter_saves_when_needed() throws Exception {
         FilterChain chain = mock(FilterChain.class);
         request.setPathInfo("/login.do");
+        request.setRequestURI("/login.do");
         request.setParameter(FORM_REDIRECT_PARAMETER, redirectUri);
         assertTrue(cache.shouldSaveFormRedirectParameter(request));
         ServletResponse response = new MockHttpServletResponse();

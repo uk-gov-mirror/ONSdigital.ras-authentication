@@ -59,7 +59,7 @@ public class UaaSavedRequestCache extends HttpSessionRequestCache implements Fil
         HttpServletRequest request = (HttpServletRequest)req;
         //we want to be able to capture the parameter on posts
         if (shouldSaveFormRedirectParameter(request) && notAuthenticated()) {
-            //saveClientRedirect(request, request.getParameter(FORM_REDIRECT_PARAMETER));
+            saveClientRedirect(request, request.getParameter(FORM_REDIRECT_PARAMETER));
         }
         chain.doFilter(request, res);
     }
