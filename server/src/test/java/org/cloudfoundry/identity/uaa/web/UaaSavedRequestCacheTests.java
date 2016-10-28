@@ -33,6 +33,7 @@ import javax.servlet.http.HttpSession;
 
 import static org.cloudfoundry.identity.uaa.web.UaaSavedRequestAwareAuthenticationSuccessHandler.FORM_REDIRECT_PARAMETER;
 import static org.cloudfoundry.identity.uaa.web.UaaSavedRequestAwareAuthenticationSuccessHandler.SAVED_REQUEST_SESSION_ATTRIBUTE;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -68,6 +69,32 @@ public class UaaSavedRequestCacheTests {
     @After
     public void reset() {
         SecurityContextHolder.clearContext();
+    }
+
+    @Test
+    public void creatingASavedRequestShouldParseParameters() {
+        String url = "http://localhost:8080/?param1=value1&param1=value12&param2=value2";
+        ClientRedirectSavedRequest saved = new ClientRedirectSavedRequest(request, url);
+        assertNotNull(saved.getParameterMap());
+        String[] param1s = saved.getParameterMap().get("param1");
+        assertNotNull(param1s);
+        assertArrayEquals(new String[] {"value1", "value12"}, param1s);
+
+        param1s = saved.getParameterValues("param1");
+        assertNotNull(param1s);
+        assertArrayEquals(new String[] {"value1", "value12"}, param1s);
+
+        assertArrayEquals(new String[] {"param1", "param2"}, saved.getParameterNames().toArray(new String[0]));
+
+        String[] param2 = saved.getParameterMap().get("param2");
+        assertNotNull(param2);
+        assertArrayEquals(new String[] {"value2"}, param2);
+
+        param2 = saved.getParameterValues("param2");
+        assertNotNull(param2);
+        assertArrayEquals(new String[] {"value2"}, param2);
+
+
     }
 
     @Test

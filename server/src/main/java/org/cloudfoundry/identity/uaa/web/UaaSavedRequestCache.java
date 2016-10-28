@@ -16,6 +16,7 @@
 package org.cloudfoundry.identity.uaa.web;
 
 
+import org.cloudfoundry.identity.uaa.util.UaaUrlUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.PortResolver;
@@ -23,6 +24,7 @@ import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.security.web.util.UrlUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.Filter;
@@ -38,6 +40,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -56,7 +59,7 @@ public class UaaSavedRequestCache extends HttpSessionRequestCache implements Fil
         HttpServletRequest request = (HttpServletRequest)req;
         //we want to be able to capture the parameter on posts
         if (shouldSaveFormRedirectParameter(request) && notAuthenticated()) {
-            saveClientRedirect(request, request.getParameter(FORM_REDIRECT_PARAMETER));
+            //saveClientRedirect(request, request.getParameter(FORM_REDIRECT_PARAMETER));
         }
         chain.doFilter(request, res);
     }
@@ -121,10 +124,22 @@ public class UaaSavedRequestCache extends HttpSessionRequestCache implements Fil
     public static class ClientRedirectSavedRequest extends DefaultSavedRequest {
 
         private final String redirectUrl;
+        private final Map<String, String[]> parameters;
 
         public ClientRedirectSavedRequest(HttpServletRequest request, String redirectUrl) {
             super(request, req -> req.getServerPort());
             this.redirectUrl = redirectUrl;
+            MultiValueMap<String, String> map = UaaUrlUtils.getParameterMap(redirectUrl);
+            Map<String, String[]> parammap = new HashMap<>();
+            map
+                .entrySet()
+                .stream()
+                .forEach(
+                    e ->
+                        parammap.put(e.getKey(),
+                                     e.getValue() == null ? null : e.getValue().toArray(new String[0]))
+            );
+            parameters = Collections.unmodifiableMap(parammap);
         }
 
         @Override
@@ -159,12 +174,17 @@ public class UaaSavedRequestCache extends HttpSessionRequestCache implements Fil
 
         @Override
         public String[] getParameterValues(String name) {
-            return new String[0];
+            return parameters.get(name);
         }
 
         @Override
         public Map<String, String[]> getParameterMap() {
-            return Collections.emptyMap();
+            return parameters;
+        }
+
+        @Override
+        public Collection<String> getParameterNames() {
+            return parameters.keySet();
         }
 
         @Override

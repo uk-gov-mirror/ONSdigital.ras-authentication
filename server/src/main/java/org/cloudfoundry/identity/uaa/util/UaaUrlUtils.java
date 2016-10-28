@@ -17,6 +17,7 @@ package org.cloudfoundry.identity.uaa.util;
 import org.cloudfoundry.identity.uaa.zone.IdentityZone;
 import org.cloudfoundry.identity.uaa.zone.IdentityZoneHolder;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -81,6 +82,11 @@ public abstract class UaaUrlUtils {
     public static String getHostForURI(String uri) {
         UriComponentsBuilder b = UriComponentsBuilder.fromHttpUrl(uri);
         return b.build().getHost();
+    }
+
+    public static MultiValueMap<String, String> getParameterMap(String uri) {
+        UriComponentsBuilder b = UriComponentsBuilder.fromHttpUrl(uri);
+        return b.build().getQueryParams();
     }
 
     public static boolean isUrl(String url) {
