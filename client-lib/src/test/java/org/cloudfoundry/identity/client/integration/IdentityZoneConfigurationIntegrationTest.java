@@ -100,7 +100,7 @@ public class IdentityZoneConfigurationIntegrationTest {
         );
 
         assertEquals(HttpStatus.CREATED, created.getStatusCode());
-        assertThat(created.getBody().getConfig().getCorsPolicy().getXhrConfiguration().getAllowedMethods(), containsInAnyOrder("GET"));
+        assertThat(created.getBody().getConfig().getCorsPolicy().getXhrConfiguration().getAllowedMethods(), containsInAnyOrder("GET", "OPTIONS"));
         assertThat(created.getBody().getConfig().getCorsPolicy().getDefaultConfiguration().getAllowedMethods(), containsInAnyOrder("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         assertThat(created.getBody().getConfig().getCorsPolicy().getXhrConfiguration().getAllowedHeaders(), containsInAnyOrder(ACCEPT, ACCEPT_LANGUAGE, CONTENT_TYPE, CONTENT_LANGUAGE,AUTHORIZATION, "X-Requested-With"));
         assertThat(created.getBody().getConfig().getCorsPolicy().getDefaultConfiguration().getAllowedHeaders(), containsInAnyOrder(ACCEPT, ACCEPT_LANGUAGE, CONTENT_TYPE, CONTENT_LANGUAGE,AUTHORIZATION));
