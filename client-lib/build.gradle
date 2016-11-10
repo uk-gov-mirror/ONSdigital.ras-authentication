@@ -7,6 +7,7 @@ dependencies {
   testCompile group: 'junit', name: 'junit', version: parent.junitVersion
   testCompile identityModel.configurations.testCompile.dependencies
   testCompile identityModel.sourceSets.test.output
+  testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: parent.hamcrestVersion
 }
 
 processResources {
