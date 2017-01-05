@@ -10,7 +10,9 @@ curl https://packages.microsoft.com/config/ubuntu/16.04/mssql-server.list | sudo
 curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
 
 sudo apt-get -y update
-sudo apt-get -y install mssql-server
+#sudo apt-get -y install mssql-server
+sudo apt-get -y install docker.io
+sudo docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=changemeCHANGEME1234!' -p 1433:1433 -d microsoft/mssql-server-linux
 sudo apt-get -y install mssql-tools
 
 #Start SQL Server and set the base password

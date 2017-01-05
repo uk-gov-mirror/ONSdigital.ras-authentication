@@ -14,7 +14,7 @@ env:
   - TESTENV=mysql,default
   - TESTENV=postgresql,default
   - TESTENV=ldap,default
-#  - TESTENV=sqlserver,default
+  - TESTENV=sqlserver,default
 cache:
   apt: true
   directories:
@@ -22,6 +22,7 @@ cache:
 services:
 - mysql
 - postgresql
+
 before_install:
 - cp $TRAVIS_BUILD_DIR/scripts/travis/init.gradle $HOME/.gradle
 - psql -c 'drop database if exists uaa;' -U postgres
@@ -33,6 +34,7 @@ before_install:
 - mysql -e 'create database uaa;'
 - mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('changeme');"
 - mysql -e "SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('changeme');"
+- if [ "$TESTENV" = "sqlserver,default" ]; then ./scripts/travis/install-mssqlserver-ubuntu.sh; fi
 install:
 - sudo chmod a+w `readlink -f $JAVA_HOME/jre/lib/security/cacerts`
 - scripts/travis/install-ldap-certs.sh
