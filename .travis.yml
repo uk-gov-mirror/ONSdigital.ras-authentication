@@ -14,6 +14,7 @@ env:
   - TESTENV=mysql,default
   - TESTENV=postgresql,default
   - TESTENV=ldap,default
+#  - TESTENV=sqlserver,default
 cache:
   apt: true
   directories:
