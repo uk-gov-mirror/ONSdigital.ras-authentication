@@ -1,4 +1,4 @@
-sudo: required
+dist: trusty
 language: java
 jdk:
   - oraclejdk8
@@ -14,7 +14,7 @@ env:
   - TESTENV=mysql,default
   - TESTENV=postgresql,default
   - TESTENV=ldap,default
-#  - TESTENV=sqlserver,default
+  - TESTENV=sqlserver,default
 cache:
   apt: true
   directories:
@@ -22,7 +22,11 @@ cache:
 services:
 - mysql
 - postgresql
+
 before_install:
+- mkdir -p ~/.gradle
+- echo "org.gradle.daemon=false" >> ~/.gradle/gradle.properties
+- cat /etc/os-release
 - cp $TRAVIS_BUILD_DIR/scripts/travis/init.gradle $HOME/.gradle
 - psql -c 'drop database if exists uaa;' -U postgres
 - psql -c 'create database uaa;' -U postgres
@@ -32,20 +36,26 @@ before_install:
 - mysql -e 'drop database if exists uaa;'
 - mysql -e 'create database uaa;'
 - mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('changeme');"
-- mysql -e "SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('changeme');"
+- mysql -u root -pchangeme -e "SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('changeme');"
+- if [ "$TESTENV" = "sqlserver,default" ]; then
+    ./scripts/travis/sqlserver/install-mssqlserver-docker.sh;
+    ./gradlew -b mssql.gradle createSQLServerUAA;
+  fi
 install:
 - sudo chmod a+w `readlink -f $JAVA_HOME/jre/lib/security/cacerts`
 - scripts/travis/install-ldap-certs.sh
 - ./scripts/ldap/install-ldap.sh ssl
-- if [ "$TESTENV" = "keystone,default" ]; then ./scripts/keystone/install-keystone.sh;
-  fi
+- if [ "$TESTENV" = "keystone,default" ]; then ./scripts/keystone/install-keystone.sh; fi
 - $TRAVIS_BUILD_DIR/scripts/travis/apply_spring_profiles_to_uaa_yaml.sh $TESTENV
 - if [ "$TESTENV" = "ldap,default" ]; then ./scripts/ldap/configure-manifest.sh; fi
-- if [ "$TESTENV" = "keystone,default" ]; then ./scripts/keystone/configure-manifest.sh;
-  fi
+- if [ "$TESTENV" = "keystone,default" ]; then ./scripts/keystone/configure-manifest.sh; fi
 - mkdir -p $HOME/build/cloudfoundry/uaa/uaa/build/reports/tests
 script:
-- ./gradlew -Dspring.profiles.active=$TESTENV jacocoRootReport
+- if [ "$TESTENV" = "sqlserver,default" ]; then
+     ./gradlew -Dspring.profiles.active=$TESTENV test;
+  else
+    ./gradlew -Dspring.profiles.active=$TESTENV jacocoRootReport;
+  fi
 after_success:
 - ./gradlew coveralls
 - for i in $(find $HOME/build/cloudfoundry/uaa/ -name reports -type d); do rm -rf $i; done
