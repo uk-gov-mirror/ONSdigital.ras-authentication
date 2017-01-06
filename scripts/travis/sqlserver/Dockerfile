@@ -1,5 +1,9 @@
 FROM ubuntu:16.04
 
+#Build with
+#sudo docker build --no-cache -t cfidentity/ubuntu-16.04-sqlserver .
+
+
 WORKDIR ~/
 
 RUN export DEBIAN_FRONTEND=noninteractive
@@ -11,6 +15,7 @@ RUN apt-get -y install curl
 RUN apt-get -y install sudo
 
 ADD ms-sql-server-db.sql /root/
+ADD start-mssql.sh /root/
 
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 RUN curl https://packages.microsoft.com/config/ubuntu/16.04/mssql-server.list | tee /etc/apt/sources.list.d/mssql-server.list
@@ -25,17 +30,13 @@ RUN apt-get update -o Dir::Etc::sourcelist="sources.list.d/msprod.list" -o Dir::
 RUN echo "Installing server"
 RUN apt-get -y install mssql-server
 
-RUN echo "Start SQL Server and set the base password"
-RUN SA_PASSWORD=changemeCHANGEME1234! /opt/mssql/bin/sqlservr-setup --accept-eula --set-sa-password --start-service
-
 RUN echo "Installing tools"
 RUN ACCEPT_EULA=y apt-get -y install mssql-tools
 
-RUN echo "Create the uaa database and root user"
-RUN sqlcmd -S localhost -U SA -P 'changemeCHANGEME1234!' -i $DIR/ms-sql-server-db.sql
-
-RUN echo "Installation complete...database listening on port 1433"
+RUN echo "Installation complete..."
 EXPOSE 1433
+
+ENTRYPOINT /root/start-mssql.sh
 ##################### INSTALLATION END #####################
 
 
