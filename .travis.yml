@@ -24,7 +24,7 @@ services:
 - postgresql
 
 before_install:
-- export HOST_IP=`ip addr show ehh0 | grep -Po 'inet \K[\d.]+'`
+- export HOST_IP=`ip addr show eth0 | grep -Po 'inet \K[\d.]+'`
 - echo "Host IP: $HOST_IP"
 - cp $TRAVIS_BUILD_DIR/scripts/travis/init.gradle $HOME/.gradle
 - psql -c 'drop database if exists uaa;' -U postgres
