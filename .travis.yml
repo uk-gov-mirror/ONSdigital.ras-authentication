@@ -25,6 +25,7 @@ services:
 
 before_install:
 - mkdir -p ~/.gradle
+- echo "org.gradle.daemon=false" >> ~/.gradle/gradle.properties
 - cat /etc/os-release
 - cp $TRAVIS_BUILD_DIR/scripts/travis/init.gradle $HOME/.gradle
 - psql -c 'drop database if exists uaa;' -U postgres
