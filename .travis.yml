@@ -15,10 +15,10 @@ env:
   - TESTENV=postgresql,default
   - TESTENV=ldap,default
   - TESTENV=sqlserver,default
-#cache:
-#  apt: true
-#  directories:
-#  - $HOME/.gradle
+cache:
+  apt: true
+  directories:
+  - $HOME/.gradle
 services:
 - mysql
 - postgresql
