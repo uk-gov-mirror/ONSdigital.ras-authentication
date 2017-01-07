@@ -36,6 +36,7 @@ before_install:
 - mysql -e 'create database uaa;'
 - mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('changeme');"
 - mysql -e "SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('changeme');"
+- cat /etc/os-release
 - if [ "$TESTENV" = "sqlserver,default" ]; then ./scripts/travis/sqlserver/install-mssqlserver-docker.sh; fi
 - if [ "$TESTENV" = "sqlserver,default" ]; then ./gradlew -b mssql.gradle createSQLServerUAA fi
 install:
