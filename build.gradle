@@ -24,12 +24,12 @@ buildscript {
     classpath group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: mssqlVersion
     classpath group: 'org.flywaydb', name: 'flyway-gradle-plugin', version: flywayVersion
     classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
-    classpath "gradle.plugin.com.dorongold.plugins:task-tree:1.2.2"
+//    classpath "gradle.plugin.com.dorongold.plugins:task-tree:1.2.2"
     classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.3'
   }
 }
 
-apply plugin: "com.dorongold.task-tree"
+//apply plugin: "com.dorongold.task-tree"
 
 ext {
   databaseType = {
