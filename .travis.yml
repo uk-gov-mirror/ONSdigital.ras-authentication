@@ -49,9 +49,9 @@ install:
 - mkdir -p $HOME/build/cloudfoundry/uaa/uaa/build/reports/tests
 script:
   - if [ "$TESTENV" = "sqlserver,default" ];
-    then ./gradlew -Dspring.profiles.active=$TESTENV integrationTest test;
-    else ./gradlew -Dspring.profiles.active=$TESTENV jacocoRootReport;
+    then rm -rf ~/.gradle/caches
     fi
+  - ./gradlew -Dspring.profiles.active=$TESTENV jacocoRootReport;
 
 after_success:
 - if [ "$TESTENV" = "sqlserver,default" ];
