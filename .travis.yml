@@ -24,8 +24,7 @@ services:
 - postgresql
 
 before_install:
-- export HOST_IP=`ip addr show eth0 | grep -Po 'inet \K[\d.]+'`
-- echo $HOST_IP
+- cat /etc/os-release
 - cp $TRAVIS_BUILD_DIR/scripts/travis/init.gradle $HOME/.gradle
 - psql -c 'drop database if exists uaa;' -U postgres
 - psql -c 'create database uaa;' -U postgres
@@ -35,8 +34,7 @@ before_install:
 - mysql -e 'drop database if exists uaa;'
 - mysql -e 'create database uaa;'
 - mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('changeme');"
-- mysql -e "SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('changeme');"
-- cat /etc/os-release
+- mysql -u root -pchangeme -e "SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('changeme');"
 - if [ "$TESTENV" = "sqlserver,default" ]; then ./scripts/travis/sqlserver/install-mssqlserver-docker.sh; fi
 - if [ "$TESTENV" = "sqlserver,default" ]; then ./gradlew -b mssql.gradle createSQLServerUAA fi
 install:
