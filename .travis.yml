@@ -35,8 +35,8 @@ before_install:
 - mysql -e 'create database uaa;'
 - mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('changeme');"
 - mysql -u root -pchangeme -e "SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('changeme');"
-- if [ "$TESTENV" = "sqlserver,default" ]; then ./scripts/travis/sqlserver/install-mssqlserver-docker.sh; fi
-- if [ "$TESTENV" = "sqlserver,default" ]; then ./gradlew -b mssql.gradle createSQLServerUAA; fi
+- ./scripts/travis/sqlserver/install-mssqlserver-docker.sh
+- ./gradlew -b mssql.gradle createSQLServerUAA
 install:
 - sudo chmod a+w `readlink -f $JAVA_HOME/jre/lib/security/cacerts`
 - scripts/travis/install-ldap-certs.sh
@@ -48,16 +48,9 @@ install:
   fi
 - mkdir -p $HOME/build/cloudfoundry/uaa/uaa/build/reports/tests
 script:
-  - if [ "$TESTENV" = "sqlserver,default" ]; then rm -rf ~/.gradle/caches; fi
-  - ./gradlew -Dspring.profiles.active=$TESTENV jacocoRootReport;
-
+- ./gradlew -Dspring.profiles.active=$TESTENV jacocoRootReport;
 after_success:
-- if [ "$TESTENV" = "sqlserver,default" ];
-  then
-    echo "No coveralls for MS SQL Server for now
-  else
-    ./gradlew coveralls
-  fi
+- ./gradlew coveralls
 - for i in $(find $HOME/build/cloudfoundry/uaa/ -name reports -type d); do rm -rf $i; done
 - /bin/df -h
 - /usr/bin/du -sh *
