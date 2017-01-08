@@ -7,7 +7,7 @@ cd `dirname $0`/../..
 sudo apt-get -qy purge slapd ldap-utils
 set -x
 
-sudo apt-get -qy update
+#sudo apt-get -qy update
 sudo DEBIAN_FRONTEND=noninteractive apt-get -qy install slapd ldap-utils
 
 # SSH Installation notes - from https://help.ubuntu.com/14.04/serverguide/openldap-server.html#openldap-tls
