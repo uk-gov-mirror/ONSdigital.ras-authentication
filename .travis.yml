@@ -53,7 +53,7 @@ install:
 - mkdir -p $HOME/build/cloudfoundry/uaa/uaa/build/reports/tests
 script:
 - if [ "$TESTENV" = "sqlserver,default" || "mysql,default" ]; then
-     ./gradlew -Dspring.profiles.active=$TESTENV test;
+     ./gradlew -Dspring.profiles.active=$TESTENV cloudfoundry-identity-server:test;
   else
     ./gradlew -Dspring.profiles.active=$TESTENV jacocoRootReport;
   fi
