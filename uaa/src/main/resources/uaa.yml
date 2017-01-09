@@ -56,7 +56,7 @@
 #  password: blabla
 
 #mysql commands that were run
-#create database uaa;
+#CREATE DATABASE uaa DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
 #SET PASSWORD FOR 'root'@'localhost' = PASSWORD('changeme');
 #SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('changeme');
 

@@ -35,7 +35,7 @@ before_install:
 - psql -c "create user root with superuser password 'changeme';" --dbname=uaa -U postgres
 - psql -c "show max_connections;" --dbname=uaa -U postgres
 - mysql -e 'drop database if exists uaa;'
-- mysql -e 'create database uaa;'
+- mysql -e 'CREATE DATABASE uaa DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;'
 - mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('changeme');"
 - mysql -u root -pchangeme -e "SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('changeme');"
 - if [ "$TESTENV" = "sqlserver,default" ]; then
