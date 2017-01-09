@@ -10,10 +10,10 @@ env:
   global:
   - secure: Ubdyw9qc/AVX61ZTehLm90NG5q+qCIPljY5nYNmmkjvNKRIpx1bYIDjFflfXbSKn+opqBdpo5qQJwLQwO1xCvWfDsAO9YlriiqIZQuYXynAqe0hCqKkMn7OqTDR+rZuA+jl7t7LVwWhwbQ4+IiAC44d6CKIa1WPhmgy5dHxBKac=
   matrix:
-  - TESTENV=default
-  - TESTENV=mysql,default
-  - TESTENV=postgresql,default
-  - TESTENV=ldap,default
+  - env: TESTENV=default
+  - env: TESTENV=mysql,default
+  - env: TESTENV=postgresql,default
+  - env: TESTENV=ldap,default
   - env: TESTENV=sqlserver,default
     dist: trusty
 cache:
@@ -52,7 +52,7 @@ install:
 - if [ "$TESTENV" = "keystone,default" ]; then ./scripts/keystone/configure-manifest.sh; fi
 - mkdir -p $HOME/build/cloudfoundry/uaa/uaa/build/reports/tests
 script:
-- if [ "$TESTENV" = "sqlserver,default" || "mysql,default" ]; then
+- if [ "$TESTENV" = "sqlserver,default" ]; then
      ./gradlew -Dspring.profiles.active=$TESTENV cloudfoundry-identity-server:test;
   else
     ./gradlew -Dspring.profiles.active=$TESTENV jacocoRootReport;
