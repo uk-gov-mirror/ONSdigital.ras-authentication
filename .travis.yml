@@ -1,4 +1,3 @@
-dist: trusty
 sudo: required
 language: java
 jdk:
@@ -15,7 +14,8 @@ env:
   - TESTENV=mysql,default
   - TESTENV=postgresql,default
   - TESTENV=ldap,default
-  - TESTENV=sqlserver,default
+  - env: TESTENV=sqlserver,default
+    dist: trusty
 cache:
   apt: true
   directories:
