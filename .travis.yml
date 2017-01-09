@@ -37,8 +37,10 @@ before_install:
 - mysql -e 'create database uaa;'
 - mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('changeme');"
 - mysql -u root -pchangeme -e "SET PASSWORD FOR 'root'@'127.0.0.1' = PASSWORD('changeme');"
-- ./scripts/travis/sqlserver/install-mssqlserver-docker.sh
-- ./gradlew -b mssql.gradle createSQLServerUAA
+- if [ "$TESTENV" = "sqlserver,default" ]; then
+    ./scripts/travis/sqlserver/install-mssqlserver-docker.sh;
+    ./gradlew -b mssql.gradle createSQLServerUAA;
+  fi
 install:
 - sudo chmod a+w `readlink -f $JAVA_HOME/jre/lib/security/cacerts`
 - scripts/travis/install-ldap-certs.sh
