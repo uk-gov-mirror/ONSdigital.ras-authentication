@@ -52,7 +52,7 @@ install:
 - if [ "$TESTENV" = "keystone,default" ]; then ./scripts/keystone/configure-manifest.sh; fi
 - mkdir -p $HOME/build/cloudfoundry/uaa/uaa/build/reports/tests
 script:
-- if [ "$TESTENV" = "sqlserver,default" ]; then
+- if [ "$TESTENV" = "sqlserver,default" || "mysql,default" ]; then
      ./gradlew -Dspring.profiles.active=$TESTENV test;
   else
     ./gradlew -Dspring.profiles.active=$TESTENV jacocoRootReport;
