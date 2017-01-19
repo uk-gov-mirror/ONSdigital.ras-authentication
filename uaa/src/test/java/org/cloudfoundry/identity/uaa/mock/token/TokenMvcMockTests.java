@@ -801,7 +801,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
         assertNotNull(userInfoResponse);
         userInfo = JsonUtils.readValue(userInfoResponse, UserInfoResponse.class);
-        return userInfo.getLastLogonSuccess();
+        return userInfo.getPreviousLogonSuccess();
     }
 
     @Test
@@ -1893,7 +1893,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         assertEquals(state, ((List<String>) token.get(OAuth2Utils.STATE)).get(0));
     }
 
-    private void validateOpenIdConnectToken(String token, String userId, String clientId) {
+    private void validateOpenIdConnectToken(String token, String userId, String clientId) throws Exception {
         Map<String,Object> result = getClaimsForToken(token);
         String iss = (String)result.get(ClaimConstants.ISS);
         assertEquals(tokenServices.getTokenEndpoint(), iss);
@@ -1912,8 +1912,10 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         //TODO OpenID
         Integer auth_time = (Integer)result.get(ClaimConstants.AUTH_TIME);
         assertNotNull(auth_time);
-        Long last_logon_time = (Long) result.get(ClaimConstants.LAST_LOGON_TIME);
-        assertNotNull(last_logon_time);
+        Long previous_logon_time = (Long) result.get(ClaimConstants.PREVIOUS_LOGON_TIME);
+        assertNotNull(previous_logon_time);
+        Long dbPreviousLogonTime = getWebApplicationContext().getBean(UaaUserDatabase.class).retrieveUserById(userId).getPreviousLogonTime();
+        assertEquals(dbPreviousLogonTime, previous_logon_time);
 
     }
 

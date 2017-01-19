@@ -114,7 +114,7 @@ public class UserInfoEndpointTests {
         assertEquals("Dale Olds", map.getFullName());
         assertEquals("olds@vmware.com", map.getEmail());
         assertEquals("8505551234", map.getPhoneNumber());
-        assertEquals(1000, (long) map.getLastLogonSuccess());
+        assertEquals(1000, (long) map.getPreviousLogonSuccess());
         assertEquals(user.getId(), map.getSub());
         assertNull(map.getAttributeValue(USER_ATTRIBUTES));
     }
@@ -128,7 +128,7 @@ public class UserInfoEndpointTests {
 
         UserInfoResponse map = endpoint.loginInfo(new OAuth2Authentication(createOauthRequest(Arrays.asList("openid")), authentication));
 
-        assertNull(map.getLastLogonSuccess());
+        assertNull(map.getPreviousLogonSuccess());
     }
 
     @Test
