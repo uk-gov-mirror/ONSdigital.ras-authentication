@@ -1,6 +1,8 @@
 <link href="https://raw.github.com/clownfart/Markdown-CSS/master/markdown.css" rel="stylesheet"></link>
 # CloudFoundry User Account and Authentication (UAA) Server
 
+* curl -v -XPOST -H"Application/json" -u "cf:" --data "username=stefan&password=wallaby&client_id=cf&grant_type=password&response_type=token" http://localhost:8888/uaa/oauth/token
+
 [![Build Status](https://travis-ci.org/cloudfoundry/uaa.svg?branch=develop)](https://travis-ci.org/cloudfoundry/uaa)
 [![Coverage Status](https://coveralls.io/repos/cloudfoundry/uaa/badge.png?branch=develop)](https://coveralls.io/r/cloudfoundry/uaa?branch=develop)
 
