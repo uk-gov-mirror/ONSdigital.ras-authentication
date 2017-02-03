@@ -1,0 +1,33 @@
+ curl -v -XPOST -H"Application/json" -u "cf:" --data "username=stefan&password=wallaby&client_id=cf&grant_type=password&response_type=token" http://localhost:8888/uaa/oauth/token
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying ::1...
+* TCP_NODELAY set
+* Connected to localhost (::1) port 8888 (#0)
+* Server auth using Basic with user 'cf'
+> POST /uaa/oauth/token HTTP/1.1
+> Host: localhost:8888
+> Authorization: Basic Y2Y6
+> User-Agent: curl/7.51.0
+> Accept: */*
+> Content-Length: 85
+> Content-Type: application/x-www-form-urlencoded
+> 
+* upload completely sent off: 85 out of 85 bytes
+< HTTP/1.1 200 OK
+< Server: Apache-Coyote/1.1
+< Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+< Pragma: no-cache
+< Expires: 0
+< X-XSS-Protection: 1; mode=block
+< X-Frame-Options: DENY
+< X-Content-Type-Options: nosniff
+< Cache-Control: no-store
+< Pragma: no-cache
+< Content-Type: application/json;charset=UTF-8
+< Transfer-Encoding: chunked
+< Date: Fri, 03 Feb 2017 11:01:04 GMT
+< 
+* Curl_http_done: called premature == 0
+* Connection #0 to host localhost left intact
+{"access_token":"eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI4OGY4YWJjMi05YzgxLTQwZmQtYTAzNC01ZDFjM2NhOTEzODAiLCJzdWIiOiI3YmU3OTk3ZC04ZTQ1LTQ0YjUtYTEyYS05NDdiZjI5Mjk5ZGEiLCJzY29wZSI6WyJzY2ltLnVzZXJpZHMiLCJvcGVuaWQiLCJ1YWEudXNlciIsImNsb3VkX2NvbnRyb2xsZXIucmVhZCIsInBhc3N3b3JkLndyaXRlIiwiY2xvdWRfY29udHJvbGxlci53cml0ZSJdLCJjbGllbnRfaWQiOiJjZiIsImNpZCI6ImNmIiwiYXpwIjoiY2YiLCJncmFudF90eXBlIjoicGFzc3dvcmQiLCJ1c2VyX2lkIjoiN2JlNzk5N2QtOGU0NS00NGI1LWExMmEtOTQ3YmYyOTI5OWRhIiwib3JpZ2luIjoidWFhIiwidXNlcl9uYW1lIjoic3RlZmFuIiwiZW1haWwiOiJzdGVmYW5AdGVzdC5vcmciLCJhdXRoX3RpbWUiOjE0ODYxMTk2NjQsInJldl9zaWciOiI1OGVkMDdmYiIsImlhdCI6MTQ4NjExOTY2NCwiZXhwIjoxNDg2MTYyODY0LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbImNmIiwic2NpbSIsIm9wZW5pZCIsInVhYSIsImNsb3VkX2NvbnRyb2xsZXIiLCJwYXNzd29yZCJdfQ.qMnlBAKW4rwvTmM_B-zQB7-Bb8d-gK7wmfQRCMnS4VI","token_type":"bearer","refresh_token":"eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJlNjA0YzIzOS1jNmEyLTQwOWMtOWIxNS1kZmFhYmMzMDlmYmEtciIsInN1YiI6IjdiZTc5OTdkLThlNDUtNDRiNS1hMTJhLTk0N2JmMjkyOTlkYSIsInNjb3BlIjpbInNjaW0udXNlcmlkcyIsIm9wZW5pZCIsInVhYS51c2VyIiwiY2xvdWRfY29udHJvbGxlci5yZWFkIiwicGFzc3dvcmQud3JpdGUiLCJjbG91ZF9jb250cm9sbGVyLndyaXRlIl0sImlhdCI6MTQ4NjExOTY2NCwiZXhwIjoxNDg4NzExNjY0LCJjaWQiOiJjZiIsImNsaWVudF9pZCI6ImNmIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3VhYS9vYXV0aC90b2tlbiIsInppZCI6InVhYSIsImdyYW50X3R5cGUiOiJwYXNzd29yZCIsInVzZXJfbmFtZSI6InN0ZWZhbiIsIm9yaWdpbiI6InVhYSIsInVzZXJfaWQiOiI3YmU3OTk3ZC04ZTQ1LTQ0YjUtYTEyYS05NDdiZjI5Mjk5ZGEiLCJyZXZfc2lnIjoiNThlZDA3ZmIiLCJhdWQiOlsiY2YiLCJzY2ltIiwib3BlbmlkIiwidWFhIiwiY2xvdWRfY29udHJvbGxlciIsInBhc3N3b3JkIl19.t6h2FeFpPbISz40C2pLukFaou-p_Ckgn_YhmEO0aFIc","expires_in":43199,"scope":"scim.userids openid uaa.user cloud_controller.read password.write cloud_controller.write","jti":"88f8abc2-9c81-40fd-a034-5d1c3ca91380"}
+
