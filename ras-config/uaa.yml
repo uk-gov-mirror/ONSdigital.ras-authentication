@@ -190,11 +190,11 @@ oauth:
       - roles
       - user_attributes
       - uaa.offline_token
-      - uaa.admin
+
 
 scim:
   users:
-    - paul|wombat|paul@test.org|Paul|Smith|uaa.admin
+    - paul|wombat|paul@test.org|Paul|Smith|uaa.user
     - stefan|wallaby|stefan@test.org|Stefan|Schmidt
 
 # Default token signing key. Each installation MUST provide a unique key
