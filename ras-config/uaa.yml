@@ -190,6 +190,7 @@ oauth:
       - roles
       - user_attributes
       - uaa.offline_token
+      - uaa.admin
 
 scim:
   users:
