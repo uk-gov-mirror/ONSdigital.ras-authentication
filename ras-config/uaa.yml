@@ -169,7 +169,6 @@ scim:
     groups.update: Update group information and memberships
     uaa.user: Act as a user in the UAA
     uaa.resource: Serve resources protected by the UAA
-    uaa.admin: Act as an administrator throughout the UAA
     uaa.none: Forbid acting as a user
     uaa.offline_token: Allow offline access
 
