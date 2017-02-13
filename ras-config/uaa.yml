@@ -169,6 +169,7 @@ scim:
     groups.update: Update group information and memberships
     uaa.user: Act as a user in the UAA
     uaa.resource: Serve resources protected by the UAA
+    uaa.admin: Act as an administrator throughout the UAA
     uaa.none: Forbid acting as a user
     uaa.offline_token: Allow offline access
 
@@ -190,10 +191,9 @@ oauth:
       - user_attributes
       - uaa.offline_token
 
-
 scim:
   users:
-    - paul|wombat|paul@test.org|Paul|Smith|uaa.user
+    - paul|wombat|paul@test.org|Paul|Smith|uaa.admin
     - stefan|wallaby|stefan@test.org|Stefan|Schmidt
 
 # Default token signing key. Each installation MUST provide a unique key
