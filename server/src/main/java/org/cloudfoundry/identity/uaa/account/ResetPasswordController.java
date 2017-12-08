@@ -75,9 +75,6 @@ public class ResetPasswordController {
                                      @RequestParam(required = false, value = "client_id") String clientId,
                                      @RequestParam(required = false, value = "redirect_uri") String redirectUri,
                                      HttpServletResponse response) {
-        if(!IdentityZoneHolder.get().getConfig().getLinks().getSelfService().isSelfServiceLinksEnabled()) {
-            return handleSelfServiceDisabled(model, response, "error_message_code", "self_service_disabled");
-        }
         model.addAttribute("client_id", clientId);
         model.addAttribute("redirect_uri", redirectUri);
         return "forgot_password";
@@ -86,9 +83,6 @@ public class ResetPasswordController {
     @RequestMapping(value = "/forgot_password.do", method = RequestMethod.POST)
     public String forgotPassword(Model model, @RequestParam("username") String username, @RequestParam(value = "client_id", defaultValue = "") String clientId,
                                  @RequestParam(value = "redirect_uri", defaultValue = "") String redirectUri, HttpServletResponse response) {
-        if(!IdentityZoneHolder.get().getConfig().getLinks().getSelfService().isSelfServiceLinksEnabled()) {
-            return handleSelfServiceDisabled(model, response, "error_message_code", "self_service_disabled");
-        }
         forgotPassword(username, clientId, redirectUri);
         return "redirect:email_sent?code=reset_password";
     }
@@ -220,11 +214,5 @@ public class ResetPasswordController {
         model.addAttribute(attributeKey, attributeValue);
         response.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value());
         return "forgot_password";
-    }
-
-    private String handleSelfServiceDisabled(Model model, HttpServletResponse response, String attributeKey, String attributeValue) {
-        model.addAttribute(attributeKey, attributeValue);
-        response.setStatus(HttpStatus.NOT_FOUND.value());
-        return "error";
     }
 }
