@@ -808,11 +808,11 @@ public class LoginInfoEndpoint {
                 selfServiceLinks.put(CREATE_ACCOUNT_LINK, signup);
                 selfServiceLinks.put("register", signup);
             }
-            if (hasText(passwd)) {
-                passwd = UaaStringUtils.replaceZoneVariables(passwd, IdentityZoneHolder.get());
-                selfServiceLinks.put(FORGOT_PASSWORD_LINK, passwd);
-                selfServiceLinks.put("passwd", passwd);
-            }
+        }
+        if (hasText(passwd)) {
+            passwd = UaaStringUtils.replaceZoneVariables(passwd, IdentityZoneHolder.get());
+            selfServiceLinks.put(FORGOT_PASSWORD_LINK, passwd);
+            selfServiceLinks.put("passwd", passwd);
         }
         return selfServiceLinks;
     }
