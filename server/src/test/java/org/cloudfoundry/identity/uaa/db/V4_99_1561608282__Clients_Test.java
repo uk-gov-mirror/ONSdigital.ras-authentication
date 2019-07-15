@@ -7,6 +7,7 @@ import org.flywaydb.core.api.callback.Callback;
 import org.flywaydb.core.api.callback.Context;
 import org.flywaydb.core.api.callback.Event;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -95,6 +96,7 @@ class V4_99_1561608282__Clients_Callback implements Callback {
     }
 }
 
+@Nested
 @WithDatabaseContext
 class V4_99_1561608282__Clients_Test {
 
