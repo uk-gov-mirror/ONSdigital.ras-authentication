@@ -18,10 +18,17 @@ public class PasswordEncoderConfig {
 
     @Bean
     public PasswordEncoder nonCachingPasswordEncoder() {
-        logger.info("Building DelegatingPasswordEncoder with {bcrypt} only");
+        logger.info("Building DelegatingPasswordEncoder with {bcrypt}");
 
         Map<String, PasswordEncoder> encoders = new HashMap<>();
+
+        logger.info("Building DelegatingPasswordEncoder : Adding \"bcrypt\" to encoders");
         encoders.put("bcrypt", new BCryptPasswordEncoder());
+
+        logger.info("Building DelegatingPasswordEncoder : Adding \"null\" to encoders");
+        encoders.put("null", new BCryptPasswordEncoder());
+
+        logger.info("Building DelegatingPasswordEncoder : Adding null to encoders");
         encoders.put(null, new BCryptPasswordEncoder());
         return new DelegatingPasswordEncoder("bcrypt", encoders);
     }
