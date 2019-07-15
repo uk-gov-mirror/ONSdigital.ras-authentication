@@ -22,6 +22,7 @@ public class PasswordEncoderConfig {
 
         Map<String, PasswordEncoder> encoders = new HashMap<>();
         encoders.put("bcrypt", new BCryptPasswordEncoder());
+        encoders.put(null, new BCryptPasswordEncoder());
         return new DelegatingPasswordEncoder("bcrypt", encoders);
     }
 }
