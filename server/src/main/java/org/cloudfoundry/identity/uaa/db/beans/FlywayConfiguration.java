@@ -40,6 +40,7 @@ public class FlywayConfiguration {
                 .validateOnMigrate(false)
                 .table(VERSION_TABLE)
                 .load();
+        flyway.repair();
         flyway.migrate();
         return flyway;
     }

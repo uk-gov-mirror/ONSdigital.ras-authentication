@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>"org.cloudfoundry.identity"</groupId>
   <artifactId>cloudfoundry-identity-model</artifactId>
-  <version>4.36.0-SNAPSHOT</version>
+  <version>0.0.0</version>
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -16,7 +16,7 @@
     <dependency>
       <groupId>"org.cloudfoundry.identity"</groupId>
       <artifactId>cloudfoundry-identity-metrics-data</artifactId>
-      <version>4.36.0-SNAPSHOT</version>
+      <version>0.0.0</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -144,7 +144,7 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>5.2.0</version>
+      <version>5.5.0</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -156,7 +156,7 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
-      <version>5.2.0</version>
+      <version>5.5.0</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -196,7 +196,7 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.2.0</version>
+      <version>5.5.0</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -208,7 +208,7 @@
     <dependency>
       <groupId>org.junit.vintage</groupId>
       <artifactId>junit-vintage-engine</artifactId>
-      <version>5.2.0</version>
+      <version>5.5.0</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
