@@ -42,7 +42,7 @@ dependencies {
     compile libraries.thymeleafExtrasSpringSecurity5
     compile group: 'org.codehaus.groovy', name: 'groovy', version: '2.5.2'
 
-    compile(group: 'com.unboundid.product.scim', name: 'scim-sdk', version: '1.8.18') {
+    compile(group: 'com.unboundid.product.scim', name: 'scim-sdk', version: '1.8.21') {
         exclude(module: 'servlet-api')
         exclude(module: 'commons-logging')
         exclude(module: 'httpclient')
@@ -54,7 +54,7 @@ dependencies {
     compile group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.2.0'
     compile group: 'org.hsqldb', name: 'hsqldb', version: "2.5.0"
 
-    compile group: 'org.yaml', name: 'snakeyaml', version: '1.18'
+    compile group: 'org.yaml', name: 'snakeyaml', version: '1.24'
 
     compile libraries.springSecurityLdap
     compile libraries.springLdapCore
@@ -65,14 +65,14 @@ dependencies {
 
     compile group: 'org.passay', name: 'passay', version: '1.2.0'
 
-    compile group: 'com.warrenstrange', name: 'googleauth', version: '1.1.2'
+    compile group: 'com.warrenstrange', name: 'googleauth', version: '1.2.0'
 
     compile libraries.slf4jImpl
     compile libraries.log4jCore
 
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
 
-    compile group: 'org.apache.santuario', name: 'xmlsec', version: '2.1.2'
+    compile group: 'org.apache.santuario', name: 'xmlsec', version: '2.1.4'
 
     testCompile project(':cloudfoundry-identity-model').sourceSets.test.output
 
