@@ -17,11 +17,9 @@ dependencies {
         exclude(module: 'spring-security-web')
     }
 
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.26'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.27'
 
-    testCompile(libraries.junit) {
-        exclude(module: 'hamcrest-core')
-    }
+    testCompile(libraries.junit)
 
     compileOnly 'org.projectlombok:lombok:1.18.8'
     annotationProcessor 'org.projectlombok:lombok:1.18.6'

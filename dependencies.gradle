@@ -8,11 +8,12 @@ ext {
 def versions = [:]
 
 // Versions shared between multiple dependencies
-versions.aspectJVersion = '1.8.12'
+versions.aspectJVersion = '1.9.4'
 versions.bouncyCastleVersion = '1.62'
+versions.hamcrestVersion = '2.1'
 versions.jacksonVersion = '2.9.9'
 versions.jsonPathVersion = '2.4.0'
-versions.junit5JupiterVersion = '5.5.0'
+versions.junit5JupiterVersion = '5.5.1'
 versions.log4j2Version = '2.12.0'
 versions.powermockVersion = '2.0.2'
 versions.springBootVersion = '2.1.6.RELEASE'
@@ -21,15 +22,16 @@ versions.springRetryVersion = '1.2.4.RELEASE'
 versions.springSecurityJwtVersion = '1.0.10.RELEASE'
 versions.springSecurityOAuthVersion = '2.3.6.RELEASE'
 versions.springSecuritySamlVersion = '1.0.9.RELEASE'
-versions.springSecurityVersion = '5.1.5.RELEASE'
-versions.springVersion = '5.1.8.RELEASE'
-versions.tomcatVersion = '9.0.21'
+versions.springSecurityVersion = '5.1.6.RELEASE'
+versions.springVersion = '5.1.9.RELEASE'
+versions.tomcatVersion = '9.0.22'
 
 // Dependencies relying on shared versions
 libraries.aspectJRt = "org.aspectj:aspectjrt:${versions.aspectJVersion}"
 libraries.aspectJWeaver = "org.aspectj:aspectjweaver:${versions.aspectJVersion}"
 libraries.bouncyCastlePkix = "org.bouncycastle:bcpkix-jdk15on:${versions.bouncyCastleVersion}"
 libraries.bouncyCastleProv = "org.bouncycastle:bcprov-jdk15on:${versions.bouncyCastleVersion}"
+libraries.hamcrest = "org.hamcrest:hamcrest:${versions.hamcrestVersion}"
 libraries.jacksonAnnotations = "com.fasterxml.jackson.core:jackson-annotations:${versions.jacksonVersion}"
 libraries.jacksonDatabind = "com.fasterxml.jackson.core:jackson-databind:${versions.jacksonVersion}"
 libraries.jsonPath = "com.jayway.jsonpath:json-path:${versions.jsonPathVersion}"
@@ -83,4 +85,4 @@ libraries.postgresql = 'org.postgresql:postgresql:42.2.6'
 libraries.thymeleafDialect = 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:2.4.1'
 libraries.thymeleafExtrasSpringSecurity5 = 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5:3.0.4.RELEASE'
 libraries.thymeleafSpring5 = 'org.thymeleaf:thymeleaf-spring5:3.0.11.RELEASE'
-libraries.zxing = 'com.google.zxing:javase:3.3.1'
+libraries.zxing = 'com.google.zxing:javase:3.4.0'
