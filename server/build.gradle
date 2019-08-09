@@ -32,7 +32,7 @@ dependencies {
     compile libraries.bouncyCastleProv
     compile libraries.bouncyCastlePkix
 
-    compile group: 'com.google.guava', name: 'guava', version: '24.1.1-jre'
+    compile group: 'com.google.guava', name: 'guava', version: '28.0-jre'
 
     compile libraries.aspectJRt
     compile libraries.aspectJWeaver
@@ -40,7 +40,7 @@ dependencies {
     compile libraries.thymeleafSpring5
     compile libraries.thymeleafDialect
     compile libraries.thymeleafExtrasSpringSecurity5
-    compile group: 'org.codehaus.groovy', name: 'groovy', version: '2.5.2'
+    compile group: 'org.codehaus.groovy', name: 'groovy', version: '2.5.7'
 
     compile(group: 'com.unboundid.product.scim', name: 'scim-sdk', version: '1.8.21') {
         exclude(module: 'servlet-api')
@@ -78,12 +78,8 @@ dependencies {
 
     testCompile libraries.springTest
 
-    testCompile(libraries.junit) {
-        exclude(module: 'hamcrest-core')
-    }
-    testCompile(libraries.mockito) {
-        exclude(module: 'hamcrest-core')
-    }
+    testCompile(libraries.junit)
+    testCompile(libraries.mockito)
 
     testCompile libraries.postgresql
 
