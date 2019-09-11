@@ -12,8 +12,6 @@
  *******************************************************************************/
 package org.cloudfoundry.identity.uaa.client;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.cloudfoundry.identity.uaa.approval.ApprovalStore;
 import org.cloudfoundry.identity.uaa.audit.event.EntityDeletedEvent;
 import org.cloudfoundry.identity.uaa.authentication.UaaAuthenticationDetails;
@@ -31,9 +29,11 @@ import org.cloudfoundry.identity.uaa.resources.SimpleAttributeNameMapper;
 import org.cloudfoundry.identity.uaa.security.beans.SecurityContextAccessor;
 import org.cloudfoundry.identity.uaa.util.UaaPagingUtils;
 import org.cloudfoundry.identity.uaa.util.UaaStringUtils;
-import org.cloudfoundry.identity.uaa.zone.MultitenantClientServices;
 import org.cloudfoundry.identity.uaa.zone.IdentityZoneHolder;
 import org.cloudfoundry.identity.uaa.zone.InvalidClientSecretException;
+import org.cloudfoundry.identity.uaa.zone.MultitenantClientServices;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -740,4 +740,5 @@ public class ClientAdminEndpoints implements InitializingBean, ApplicationEventP
         }
         this.clientMaxCount = clientMaxCount;
     }
+
 }

@@ -28,6 +28,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -40,7 +44,7 @@
     <dependency>
       <groupId>org.apache.tomcat</groupId>
       <artifactId>tomcat-jdbc</artifactId>
-      <version>9.0.22</version>
+      <version>9.0.24</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -50,6 +54,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -76,6 +84,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -98,6 +110,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -124,6 +140,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -148,6 +168,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -160,7 +184,6 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-beans</artifactId>
-      <version>5.1.9.RELEASE</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -170,6 +193,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -184,7 +211,6 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
-      <version>5.1.9.RELEASE</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -194,6 +220,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -208,7 +238,6 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context-support</artifactId>
-      <version>5.1.9.RELEASE</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -218,6 +247,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -232,7 +265,6 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-tx</artifactId>
-      <version>5.1.9.RELEASE</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -242,6 +274,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -256,7 +292,6 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-jdbc</artifactId>
-      <version>5.1.9.RELEASE</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -266,6 +301,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -280,7 +319,6 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-web</artifactId>
-      <version>5.1.9.RELEASE</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -290,6 +328,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -304,7 +346,6 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-core</artifactId>
-      <version>5.1.6.RELEASE</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -314,6 +355,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -340,6 +385,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -364,6 +413,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -376,7 +429,6 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-web</artifactId>
-      <version>5.1.6.RELEASE</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -386,6 +438,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -410,6 +466,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -438,6 +498,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -472,6 +536,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -496,6 +564,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -508,7 +580,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>28.0-jre</version>
+      <version>28.1-jre</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -518,6 +590,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -544,6 +620,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -566,6 +646,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -592,6 +676,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -614,6 +702,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -640,6 +732,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -652,7 +748,7 @@
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy</artifactId>
-      <version>2.5.7</version>
+      <version>2.5.8</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -662,6 +758,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -676,7 +776,7 @@
     <dependency>
       <groupId>com.unboundid.product.scim</groupId>
       <artifactId>scim-sdk</artifactId>
-      <version>1.8.21</version>
+      <version>1.8.22</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -690,6 +790,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -728,6 +832,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -752,6 +860,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -764,7 +876,6 @@
     <dependency>
       <groupId>org.mariadb.jdbc</groupId>
       <artifactId>mariadb-java-client</artifactId>
-      <version>2.2.0</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -774,6 +885,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -800,6 +915,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -812,7 +931,7 @@
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
-      <version>1.24</version>
+      <version>1.25</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -822,6 +941,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -836,7 +959,6 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-ldap</artifactId>
-      <version>5.1.6.RELEASE</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -846,6 +968,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -860,7 +986,6 @@
     <dependency>
       <groupId>org.springframework.ldap</groupId>
       <artifactId>spring-ldap-core</artifactId>
-      <version>2.3.2.RELEASE</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -870,6 +995,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -884,7 +1013,6 @@
     <dependency>
       <groupId>org.springframework.ldap</groupId>
       <artifactId>spring-ldap-core-tiger</artifactId>
-      <version>2.3.2.RELEASE</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -894,6 +1022,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -908,7 +1040,7 @@
     <dependency>
       <groupId>org.apache.directory.api</groupId>
       <artifactId>api-ldap-model</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.3</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -922,6 +1054,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -948,6 +1084,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -972,6 +1112,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -984,7 +1128,6 @@
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-slf4j-impl</artifactId>
-      <version>2.12.0</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -994,6 +1137,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -1008,7 +1155,6 @@
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
-      <version>2.12.0</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -1018,6 +1164,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -1044,6 +1194,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -1068,6 +1222,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -1080,7 +1238,7 @@
     <dependency>
       <groupId>org.apache.tomcat.embed</groupId>
       <artifactId>tomcat-embed-core</artifactId>
-      <version>9.0.22</version>
+      <version>9.0.24</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1090,6 +1248,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -1102,9 +1264,8 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
-      <version>5.1.9.RELEASE</version>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -1114,6 +1275,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -1140,6 +1305,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -1152,7 +1321,6 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
-      <version>5.5.1</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -1162,6 +1330,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -1176,7 +1348,6 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
-      <version>5.5.1</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -1186,6 +1357,37 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>bsh-core</artifactId>
+          <groupId>org.beanshell</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hamcrest-core</artifactId>
+          <groupId>org.hamcrest</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>hamcrest-all</artifactId>
+          <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hamcrest-library</artifactId>
+          <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -1212,6 +1414,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -1224,7 +1430,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>2.13.0</version>
+      <version>3.0.0</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -1234,6 +1440,38 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>bsh-core</artifactId>
+          <groupId>org.beanshell</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hamcrest-core</artifactId>
+          <groupId>org.hamcrest</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>3.0.0</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>hamcrest-all</artifactId>
+          <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hamcrest-library</artifactId>
+          <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -1260,52 +1498,8 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>bsh-core</artifactId>
-          <groupId>org.beanshell</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>hamcrest-core</artifactId>
-          <groupId>org.hamcrest</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.powermock</groupId>
-      <artifactId>powermock-module-junit4</artifactId>
-      <version>2.0.2</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>hamcrest-all</artifactId>
-          <groupId>org.hamcrest</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>hamcrest-library</artifactId>
-          <groupId>org.hamcrest</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>bsh-core</artifactId>
-          <groupId>org.beanshell</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>hamcrest-core</artifactId>
-          <groupId>org.hamcrest</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.powermock</groupId>
-      <artifactId>powermock-api-mockito2</artifactId>
-      <version>2.0.2</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>hamcrest-all</artifactId>
-          <groupId>org.hamcrest</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>hamcrest-library</artifactId>
-          <groupId>org.hamcrest</groupId>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -1320,7 +1514,7 @@
     <dependency>
       <groupId>org.apache.tomcat</groupId>
       <artifactId>tomcat-el-api</artifactId>
-      <version>9.0.22</version>
+      <version>9.0.24</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -1330,6 +1524,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -1344,7 +1542,7 @@
     <dependency>
       <groupId>org.apache.tomcat</groupId>
       <artifactId>tomcat-jasper-el</artifactId>
-      <version>9.0.22</version>
+      <version>9.0.24</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -1354,6 +1552,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -1380,6 +1582,10 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
         <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
           <artifactId>bsh-core</artifactId>
           <groupId>org.beanshell</groupId>
         </exclusion>
@@ -1392,7 +1598,6 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.5.1</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -1402,6 +1607,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
@@ -1416,7 +1625,6 @@
     <dependency>
       <groupId>org.junit.vintage</groupId>
       <artifactId>junit-vintage-engine</artifactId>
-      <version>5.5.1</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -1426,6 +1634,10 @@
         <exclusion>
           <artifactId>hamcrest-library</artifactId>
           <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
         </exclusion>
         <exclusion>
           <artifactId>bsh-core</artifactId>
