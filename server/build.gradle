@@ -32,7 +32,7 @@ dependencies {
     compile libraries.bouncyCastleProv
     compile libraries.bouncyCastlePkix
 
-    compile group: 'com.google.guava', name: 'guava', version: '28.0-jre'
+    compile group: 'com.google.guava', name: 'guava', version: '28.1-jre'
 
     compile libraries.aspectJRt
     compile libraries.aspectJWeaver
@@ -40,9 +40,9 @@ dependencies {
     compile libraries.thymeleafSpring5
     compile libraries.thymeleafDialect
     compile libraries.thymeleafExtrasSpringSecurity5
-    compile group: 'org.codehaus.groovy', name: 'groovy', version: '2.5.7'
+    compile group: 'org.codehaus.groovy', name: 'groovy', version: '2.5.8'
 
-    compile(group: 'com.unboundid.product.scim', name: 'scim-sdk', version: '1.8.21') {
+    compile(group: 'com.unboundid.product.scim', name: 'scim-sdk', version: '1.8.22') {
         exclude(module: 'servlet-api')
         exclude(module: 'commons-logging')
         exclude(module: 'httpclient')
@@ -51,10 +51,10 @@ dependencies {
 
     compile group: 'org.hibernate', name: 'hibernate-validator', version: "6.0.17.Final"
     compile libraries.flywayCore
-    compile group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.2.0'
+    compile libraries.mariaJdbcDriver
     compile group: 'org.hsqldb', name: 'hsqldb', version: "2.5.0"
 
-    compile group: 'org.yaml', name: 'snakeyaml', version: '1.24'
+    compile group: 'org.yaml', name: 'snakeyaml', version: '1.25'
 
     compile libraries.springSecurityLdap
     compile libraries.springLdapCore
@@ -81,10 +81,9 @@ dependencies {
     testCompile(libraries.junit)
     testCompile(libraries.mockito)
 
-    testCompile libraries.postgresql
+    testCompile libraries.mockitoJunit5
 
-    testCompile libraries.powermockJunit4
-    testCompile libraries.powermockMockito
+    testCompile libraries.postgresql
 
     testCompile libraries.tomcatElApi
     testCompile libraries.tomcatJasperEl
@@ -97,6 +96,10 @@ configurations.all {
     exclude group: 'org.beanshell', module: 'bsh-core'
 }
 
+jar {
+    exclude "org/cloudfoundry/identity/uaa/web/tomcat/UaaStartupFailureListener.*"
+}
+
 processResources {
     //maven replaces project.artifactId in the log4j.properties file
     //https://www.pivotaltracker.com/story/show/74344574
@@ -105,4 +108,14 @@ processResources {
 
 integrationTest {}.onlyIf { //disable since we don't have any
     false
+}
+
+task tomcatListenerJar(type: Jar) {
+    archiveBaseName = 'tomcat-listener'
+    from(sourceSets.main.output)
+    include "org/cloudfoundry/identity/uaa/web/tomcat/UaaStartupFailureListener.*"
+}
+
+artifacts {
+    archives tomcatListenerJar
 }
