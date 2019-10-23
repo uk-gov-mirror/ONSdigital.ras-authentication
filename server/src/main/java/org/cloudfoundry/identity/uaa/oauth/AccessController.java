@@ -39,7 +39,6 @@ import org.springframework.web.context.request.WebRequest;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -101,7 +100,7 @@ public class AccessController {
 
     @RequestMapping("/oauth/confirm_access")
     public String confirm(Map<String, Object> model, final HttpServletRequest request, Principal principal,
-                    SessionStatus sessionStatus) throws Exception {
+                    SessionStatus sessionStatus) {
 
         if (!(principal instanceof Authentication)) {
             sessionStatus.setComplete();
@@ -238,7 +237,7 @@ public class AccessController {
 
             result.add(map);
         }
-        Collections.sort(result, (map1, map2) -> {
+        result.sort((map1, map2) -> {
             String code1 = map1.get("code");
             String code2 = map2.get("code");
             int i;
@@ -274,7 +273,7 @@ public class AccessController {
     }
 
     @RequestMapping("/oauth/error")
-    public String handleError(WebRequest request, Map<String, Object> model) throws Exception {
+    public String handleError(WebRequest request, Map<String, Object> model) {
         // There is already an error entry in the model
         Object object = request.getAttribute("error", RequestAttributes.SCOPE_REQUEST);
         if (object != null) {

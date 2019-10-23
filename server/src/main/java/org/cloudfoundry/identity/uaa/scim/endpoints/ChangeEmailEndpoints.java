@@ -62,7 +62,7 @@ public class ChangeEmailEndpoints implements ApplicationEventPublisherAware {
 
         final ScimUser user = scimUserProvisioning.retrieve(userId, identityZoneManager.getCurrentIdentityZoneId());
         if (user.getUserName().equals(user.getPrimaryEmail())) {
-            final List<ScimUser> results = scimUserProvisioning.query("userName eq \"" + email + "\" and origin eq \"" + OriginKeys.UAA + "\"", identityZoneManager.getCurrentIdentityZoneId());
+            final List<ScimUser> results = scimUserProvisioning.retrieveByUsernameAndOriginAndZone(email, OriginKeys.UAA, identityZoneManager.getCurrentIdentityZoneId());
             if (!results.isEmpty()) {
                 return new ResponseEntity<>(CONFLICT);
             }
@@ -80,7 +80,7 @@ public class ChangeEmailEndpoints implements ApplicationEventPublisherAware {
     public ResponseEntity<EmailChangeResponse> changeEmail(@RequestBody String code) {
         ExpiringCode expiringCode = expiringCodeStore.retrieveCode(code, identityZoneManager.getCurrentIdentityZoneId());
         if ((null != expiringCode) && ((null == expiringCode.getIntent()) || EMAIL.name().equals(expiringCode.getIntent()))) {
-            Map<String, String> data = JsonUtils.readValue(expiringCode.getData(), new TypeReference<Map<String, String>>() {
+            Map<String, String> data = JsonUtils.readValue(expiringCode.getData(), new TypeReference<>() {
             });
             assert data != null;
             String userId = data.get("userId");

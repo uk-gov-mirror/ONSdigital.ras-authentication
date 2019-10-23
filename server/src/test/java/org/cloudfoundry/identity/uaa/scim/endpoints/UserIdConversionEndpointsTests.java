@@ -13,7 +13,6 @@
 
 package org.cloudfoundry.identity.uaa.scim.endpoints;
 
-import org.cloudfoundry.identity.uaa.impl.config.UaaConfiguration;
 import org.cloudfoundry.identity.uaa.provider.IdentityProviderProvisioning;
 import org.cloudfoundry.identity.uaa.resources.SearchResults;
 import org.cloudfoundry.identity.uaa.scim.exception.ScimException;
@@ -61,8 +60,7 @@ public class UserIdConversionEndpointsTests {
     @Before
     public void init() {
         mockSecurityContextAccessor = Mockito.mock(SecurityContextAccessor.class);
-        endpoints = new UserIdConversionEndpoints(provisioning, mockSecurityContextAccessor);
-        endpoints.setScimUserEndpoints(scimUserEndpoints);
+        endpoints = new UserIdConversionEndpoints(provisioning, mockSecurityContextAccessor, scimUserEndpoints);
         endpoints.setEnabled(true);
         when(mockSecurityContextAccessor.getAuthorities()).thenReturn(authorities);
         when(mockSecurityContextAccessor.getAuthenticationInfo()).thenReturn("mock object");
@@ -169,7 +167,7 @@ public class UserIdConversionEndpointsTests {
     }
 
     @Test
-    public void noActiveIdps_ReturnsEmptyResources() throws Exception {
+    public void noActiveIdps_ReturnsEmptyResources() {
         when(provisioning.retrieveActive(anyString())).thenReturn(Collections.emptyList());
         SearchResults<?> searchResults = endpoints.findUsers("username eq \"foo\"", "ascending", 0, 100, false);
         assertTrue(searchResults.getResources().isEmpty());

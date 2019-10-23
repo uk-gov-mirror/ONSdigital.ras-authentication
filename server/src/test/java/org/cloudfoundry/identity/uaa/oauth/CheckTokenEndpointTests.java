@@ -23,7 +23,6 @@ import org.cloudfoundry.identity.uaa.oauth.approval.InMemoryApprovalStore;
 import org.cloudfoundry.identity.uaa.oauth.client.ClientConstants;
 import org.cloudfoundry.identity.uaa.oauth.openid.IdTokenCreator;
 import org.cloudfoundry.identity.uaa.oauth.openid.IdTokenGranter;
-import org.cloudfoundry.identity.uaa.oauth.refresh.RefreshTokenCreator;
 import org.cloudfoundry.identity.uaa.oauth.token.Claims;
 import org.cloudfoundry.identity.uaa.oauth.token.RevocableToken;
 import org.cloudfoundry.identity.uaa.oauth.token.RevocableTokenProvisioning;
@@ -36,7 +35,6 @@ import org.cloudfoundry.identity.uaa.util.JsonUtils;
 import org.cloudfoundry.identity.uaa.util.TimeService;
 import org.cloudfoundry.identity.uaa.zone.*;
 import org.cloudfoundry.identity.uaa.zone.beans.IdentityZoneManager;
-import org.cloudfoundry.identity.uaa.zone.beans.IdentityZoneManagerImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -326,7 +324,7 @@ public class CheckTokenEndpointTests {
         BaseClientDetails client =
                 new BaseClientDetails("client", "zones", "zones.*.admin", "authorization_code, password",
                         "scim.read, scim.write", "http://localhost:8080/uaa");
-        client.setAutoApproveScopes(Arrays.asList("zones.*.admin"));
+        client.setAutoApproveScopes(Collections.singletonList("zones.*.admin"));
         Map<String, BaseClientDetails> clientDetailsStore = Collections.singletonMap("client", client);
 
         clientDetailsService.setClientDetailsStore(IdentityZoneHolder.get().getId(), clientDetailsStore);
@@ -348,7 +346,7 @@ public class CheckTokenEndpointTests {
             endpoint.checkToken(accessToken.getValue(), Collections.emptyList(), request);
 
             fail("Token validation should fail");
-        } catch (InvalidTokenException ex) {
+        } catch (InvalidTokenException ignored) {
         }
     }
 
@@ -871,14 +869,14 @@ public class CheckTokenEndpointTests {
     public void testUserAuthoritiesNotInResult() throws Exception {
         OAuth2AccessToken accessToken = tokenServices.createAccessToken(authentication);
         Claims result = endpoint.checkToken(accessToken.getValue(), Collections.emptyList(), request);
-        assertEquals(null, result.getAuthorities());
+        assertNull(result.getAuthorities());
     }
 
     @Test
     public void testClientAuthoritiesNotInResult() throws Exception {
         OAuth2AccessToken accessToken = tokenServices.createAccessToken(authentication);
         Claims result = endpoint.checkToken(accessToken.getValue(), Collections.emptyList(), request);
-        assertEquals(null, result.getAuthorities());
+        assertNull(result.getAuthorities());
     }
 
     @Test(expected = InvalidTokenException.class)
@@ -916,7 +914,7 @@ public class CheckTokenEndpointTests {
             .setStatus(ApprovalStatus.DENIED)
             .setLastUpdatedAt(oneSecondAgo), IdentityZoneHolder.get().getId());
         Claims result = endpoint.checkToken(accessToken.getValue(), Collections.emptyList(), request);
-        assertEquals(null, result.getAuthorities());
+        assertNull(result.getAuthorities());
     }
 
     @Test(expected = InvalidTokenException.class)
@@ -935,7 +933,7 @@ public class CheckTokenEndpointTests {
             .setExpiresAt(new Date(nowMillis))
             .setStatus(ApprovalStatus.APPROVED), IdentityZoneHolder.get().getId());
         Claims result = endpoint.checkToken(accessToken.getValue(), Collections.emptyList(), request);
-        assertEquals(null, result.getAuthorities());
+        assertNull(result.getAuthorities());
     }
 
     @Test

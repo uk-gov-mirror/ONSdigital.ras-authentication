@@ -70,6 +70,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -89,7 +90,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -277,10 +277,10 @@ public class XOAuthAuthenticationManagerIT {
     public void verify_hmac_256_signature() throws Exception {
         String key = "key";
         String data = "data";
-        SecretKeySpec secretKey = new SecretKeySpec(key.getBytes("UTF-8"), "HmacSHA256");
+        SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
         Mac mac = Mac.getInstance("HmacSHA256");
         mac.init(secretKey);
-        byte[] hmacData = mac.doFinal(data.getBytes("UTF-8"));
+        byte[] hmacData = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
         assertThat(new String(Base64.encodeBase64URLSafe(hmacData)), equalTo(xoAuthAuthenticationManager.hmacSignAndEncode(data, key)));
     }
 
@@ -374,7 +374,7 @@ public class XOAuthAuthenticationManagerIT {
 
         assertThrowsWithMessageThat(InsufficientAuthenticationException.class,
                 () -> xoAuthAuthenticationManager.getExternalAuthenticationDetails(xCodeToken),
-                is(String.format("Issuer is missing in id_token"))
+                is("Issuer is missing in id_token")
         );
     }
 
@@ -857,7 +857,7 @@ public class XOAuthAuthenticationManagerIT {
 
         assertThrowsWithMessageThat(InsufficientAuthenticationException.class,
                 () -> xoAuthAuthenticationManager.getExternalAuthenticationDetails(xCodeToken),
-                is(String.format("Unable to map claim to a username"))
+                is("Unable to map claim to a username")
         );
     }
 

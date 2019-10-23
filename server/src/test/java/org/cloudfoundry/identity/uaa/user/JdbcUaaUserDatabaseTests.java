@@ -30,8 +30,6 @@ import static org.cloudfoundry.identity.uaa.user.JdbcUaaUserDatabase.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @WithDatabaseContext
@@ -229,7 +227,7 @@ class JdbcUaaUserDatabaseTests {
         assertEquals("Joe", joe.getUsername());
         assertEquals("joe@test.org", joe.getEmail());
         assertEquals("joespassword", joe.getPassword());
-        assertEquals(true, joe.isPasswordChangeRequired());
+        assertTrue(joe.isPasswordChangeRequired());
         assertTrue(joe.getAuthorities().contains(new SimpleGrantedAuthority("uaa.user")),
                 "authorities does not contain uaa.user");
     }

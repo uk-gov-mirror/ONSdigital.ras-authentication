@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.sql.Timestamp;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -101,8 +101,11 @@ class ChangeEmailEndpointsMockMvcTest {
         when(mockScimUserProvisioning.retrieve("user-id-001", currentIdentityZoneId)).thenReturn(userChangingEmail);
 
         ScimUser existingUser = new ScimUser("id001", "new@example.com", null, null);
-        when(mockScimUserProvisioning.query("userName eq \"new@example.com\" and origin eq \"" + OriginKeys.UAA + "\"", currentIdentityZoneId))
-                .thenReturn(Arrays.asList(existingUser));
+        when(mockScimUserProvisioning.retrieveByUsernameAndOriginAndZone(
+                eq("new@example.com"),
+                eq(OriginKeys.UAA),
+                eq(currentIdentityZoneId))
+        ).thenReturn(Collections.singletonList(existingUser));
 
         MockHttpServletRequestBuilder post = post("/email_verifications")
                 .contentType(APPLICATION_JSON)

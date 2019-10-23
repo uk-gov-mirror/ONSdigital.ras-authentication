@@ -20,6 +20,7 @@ import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.metadata.AssertionConsumerService;
 import org.opensaml.saml2.metadata.EntityDescriptor;
+import org.opensaml.saml2.metadata.IndexedEndpoint;
 import org.opensaml.saml2.metadata.SPSSODescriptor;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.ws.message.encoder.MessageEncodingException;
@@ -69,7 +70,7 @@ public class IdpInitiatedLoginController {
         }
         log.debug(String.format("IDP is initiating authentication request to SP[%s]", sp));
         Optional<SamlServiceProviderHolder> holder = configurator.getSamlServiceProviders().stream().filter(serviceProvider -> sp.equals(serviceProvider.getSamlServiceProvider().getEntityId())).findFirst();
-        if (!holder.isPresent()) {
+        if (holder.isEmpty()) {
             log.debug(String.format("SP[%s] was not found, aborting saml response", sp));
             throw new ProviderNotFoundException("Invalid sp entity ID. sp parameter must be a valid and configured entity ID");
         }
@@ -107,7 +108,7 @@ public class IdpInitiatedLoginController {
         EntityDescriptor entityDescriptor = metadataManager.getEntityDescriptor(sp);
         SPSSODescriptor spssoDescriptor = entityDescriptor.getSPSSODescriptor(SAMLConstants.SAML20P_NS);
         List<AssertionConsumerService> assertionConsumerServices = spssoDescriptor.getAssertionConsumerServices();
-        Optional<AssertionConsumerService> defaultService = assertionConsumerServices.stream().filter(acs -> acs.isDefault()).findFirst();
+        Optional<AssertionConsumerService> defaultService = assertionConsumerServices.stream().filter(IndexedEndpoint::isDefault).findFirst();
         if (defaultService.isPresent()) {
             return defaultService.get().getLocation();
         } else {

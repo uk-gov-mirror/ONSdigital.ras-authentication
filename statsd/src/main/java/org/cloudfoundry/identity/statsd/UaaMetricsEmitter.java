@@ -48,11 +48,10 @@ import static org.springframework.util.ReflectionUtils.findMethod;
 public class UaaMetricsEmitter {
     private static Logger logger = LoggerFactory.getLogger(UaaMetricsEmitter.class);
 
-    private static final RequestMetricSummary MISSING_METRICS = new RequestMetricSummary(0l, 0d, 0l, 0d, 0l, 0d, 0l, 0d);
+    private static final RequestMetricSummary MISSING_METRICS = new RequestMetricSummary(0L, 0d, 0L, 0d, 0L, 0d, 0L, 0d);
     private final StatsDClient statsDClient;
     private final MBeanServerConnection server;
     private final MetricsUtils metricsUtils;
-    private NotificationEmitter emitter;
     private boolean notificationsEnabled;
     private ConcurrentMap<String, Long> delta = new ConcurrentHashMap<>();
 
@@ -170,11 +169,11 @@ public class UaaMetricsEmitter {
         Map<String, MemoryUsage> memory = new HashMap<>();
         memory.put("heap", memoryBean.getHeapMemoryUsage());
         memory.put("non-heap", memoryBean.getNonHeapMemoryUsage());
-        memory.entrySet().stream().forEach(m -> {
-            statsDClient.gauge(prefix + m.getKey() + ".init", m.getValue().getInit());
-            statsDClient.gauge(prefix + m.getKey() + ".committed", m.getValue().getCommitted());
-            statsDClient.gauge(prefix + m.getKey() + ".used", m.getValue().getUsed());
-            statsDClient.gauge(prefix + m.getKey() + ".max", m.getValue().getMax());
+        memory.forEach((key, value) -> {
+            statsDClient.gauge(prefix + key + ".init", value.getInit());
+            statsDClient.gauge(prefix + key + ".committed", value.getCommitted());
+            statsDClient.gauge(prefix + key + ".used", value.getUsed());
+            statsDClient.gauge(prefix + key + ".max", value.getMax());
         });
 
     }
@@ -216,7 +215,7 @@ public class UaaMetricsEmitter {
     public void enableNotification() {
         try {
             logger.debug("Trying to enable notification");
-            emitter = metricsUtils.getUaaMetricsSubscriber(server);
+            NotificationEmitter emitter = metricsUtils.getUaaMetricsSubscriber(server);
             emitter.addNotificationListener((notification, handback) -> {
                 String key = notification.getType();
                 String prefix = key.startsWith("/") ? key.substring(1) : key;
@@ -255,18 +254,18 @@ public class UaaMetricsEmitter {
 
         private final Map<String, ?> target;
 
-        public MapWrapper(Map<String, ?> target) throws Exception {
+        public MapWrapper(Map<String, ?> target) {
             this.target = target;
             context = new StandardEvaluationContext();
             context.addPropertyAccessor(new MapAccessor());
             parser = new SpelExpressionParser();
         }
 
-        public Object get(String expression) throws Exception {
+        public Object get(String expression) {
             return get(expression, Object.class);
         }
 
-        public <T> T get(String expression, Class<T> type) throws Exception {
+        public <T> T get(String expression, Class<T> type) {
             return parser.parseExpression(expression).getValue(context, target, type);
         }
 

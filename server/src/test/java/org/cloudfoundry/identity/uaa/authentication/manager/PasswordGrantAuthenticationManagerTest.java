@@ -16,7 +16,6 @@ import org.cloudfoundry.identity.uaa.provider.oauth.XOAuthAuthenticationManager;
 import org.cloudfoundry.identity.uaa.provider.oauth.XOAuthCodeToken;
 import org.cloudfoundry.identity.uaa.provider.oauth.XOAuthProviderConfigurator;
 import org.cloudfoundry.identity.uaa.security.PollutionPreventionExtension;
-import org.cloudfoundry.identity.uaa.util.JsonUtils;
 import org.cloudfoundry.identity.uaa.zone.MultitenantClientServices;
 import org.cloudfoundry.identity.uaa.zone.IdentityZoneHolder;
 import org.junit.jupiter.api.AfterEach;
@@ -47,7 +46,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -189,7 +187,7 @@ class PasswordGrantAuthenticationManagerTest {
         assertEquals(Collections.singletonList("koala"), body.get("password"));
 
         HttpHeaders headers = httpEntity.getHeaders();
-        assertEquals(Arrays.asList(APPLICATION_JSON), headers.getAccept());
+        assertEquals(Collections.singletonList(APPLICATION_JSON), headers.getAccept());
         assertEquals(MediaType.APPLICATION_FORM_URLENCODED, headers.getContentType());
         assertNotNull(headers.get("Authorization"));
         assertEquals(1, headers.get("Authorization").size());
@@ -241,7 +239,7 @@ class PasswordGrantAuthenticationManagerTest {
         assertEquals(Collections.singletonList("koala"), body.get("password"));
 
         HttpHeaders headers = httpEntity.getHeaders();
-        assertEquals(Arrays.asList(APPLICATION_JSON), headers.getAccept());
+        assertEquals(Collections.singletonList(APPLICATION_JSON), headers.getAccept());
         assertEquals(MediaType.APPLICATION_FORM_URLENCODED, headers.getContentType());
         assertNotNull(headers.get("Authorization"));
         assertEquals(1, headers.get("Authorization").size());
@@ -274,7 +272,7 @@ class PasswordGrantAuthenticationManagerTest {
         try {
             instance.authenticate(auth);
             fail("No Exception thrown.");
-        } catch (BadCredentialsException e) {
+        } catch (BadCredentialsException ignored) {
         }
 
         ArgumentCaptor<AbstractUaaEvent> eventArgumentCaptor = ArgumentCaptor.forClass(AbstractUaaEvent.class);
@@ -496,7 +494,7 @@ class PasswordGrantAuthenticationManagerTest {
         assertNull(body.get("missingvalue"));
 
         HttpHeaders headers = httpEntity.getHeaders();
-        assertEquals(Arrays.asList(APPLICATION_JSON), headers.getAccept());
+        assertEquals(Collections.singletonList(APPLICATION_JSON), headers.getAccept());
         assertEquals(MediaType.APPLICATION_FORM_URLENCODED, headers.getContentType());
         assertNotNull(headers.get("Authorization"));
         assertEquals(1, headers.get("Authorization").size());
@@ -510,7 +508,7 @@ class PasswordGrantAuthenticationManagerTest {
         Authentication auth = mock(Authentication.class);
         when(zoneAwareAuthzAuthenticationManager.extractLoginHint(auth)).thenReturn(null);
         Map<String, Object> additionalInformation = new HashMap<>();
-        additionalInformation.put(ClientConstants.ALLOWED_PROVIDERS, Arrays.asList("uaa"));
+        additionalInformation.put(ClientConstants.ALLOWED_PROVIDERS, Collections.singletonList("uaa"));
         when(clientDetails.getAdditionalInformation()).thenReturn(additionalInformation);
 
         instance.authenticate(auth);
@@ -527,7 +525,7 @@ class PasswordGrantAuthenticationManagerTest {
         Authentication auth = mock(Authentication.class);
         when(zoneAwareAuthzAuthenticationManager.extractLoginHint(auth)).thenReturn(null);
         Map<String, Object> additionalInformation = new HashMap<>();
-        additionalInformation.put(ClientConstants.ALLOWED_PROVIDERS, Arrays.asList("ldap"));
+        additionalInformation.put(ClientConstants.ALLOWED_PROVIDERS, Collections.singletonList("ldap"));
         when(clientDetails.getAdditionalInformation()).thenReturn(additionalInformation);
 
         instance.authenticate(auth);
@@ -571,7 +569,7 @@ class PasswordGrantAuthenticationManagerTest {
         Authentication auth = mock(Authentication.class);
         when(zoneAwareAuthzAuthenticationManager.extractLoginHint(auth)).thenReturn(null);
         Map<String, Object> additionalInformation = new HashMap<>();
-        additionalInformation.put(ClientConstants.ALLOWED_PROVIDERS, Arrays.asList("uaa"));
+        additionalInformation.put(ClientConstants.ALLOWED_PROVIDERS, Collections.singletonList("uaa"));
         when(clientDetails.getAdditionalInformation()).thenReturn(additionalInformation);
         IdentityZoneHolder.get().getConfig().setDefaultIdentityProvider("uaa");
 
@@ -620,7 +618,7 @@ class PasswordGrantAuthenticationManagerTest {
         assertEquals(Collections.singletonList("koala"), body.get("password"));
 
         HttpHeaders headers = httpEntity.getHeaders();
-        assertEquals(Arrays.asList(APPLICATION_JSON), headers.getAccept());
+        assertEquals(Collections.singletonList(APPLICATION_JSON), headers.getAccept());
         assertEquals(MediaType.APPLICATION_FORM_URLENCODED, headers.getContentType());
         assertNotNull(headers.get("Authorization"));
         assertEquals(1, headers.get("Authorization").size());
@@ -661,7 +659,7 @@ class PasswordGrantAuthenticationManagerTest {
         Authentication auth = mock(Authentication.class);
         when(zoneAwareAuthzAuthenticationManager.extractLoginHint(auth)).thenReturn(null);
         Map<String, Object> additionalInformation = new HashMap<>();
-        additionalInformation.put(ClientConstants.ALLOWED_PROVIDERS, Arrays.asList("uaa"));
+        additionalInformation.put(ClientConstants.ALLOWED_PROVIDERS, Collections.singletonList("uaa"));
         when(clientDetails.getAdditionalInformation()).thenReturn(additionalInformation);
         IdentityZoneHolder.get().getConfig().setDefaultIdentityProvider("oidcprovider");
 

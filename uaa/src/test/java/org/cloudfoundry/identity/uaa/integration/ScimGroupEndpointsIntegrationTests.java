@@ -46,7 +46,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -107,17 +106,17 @@ public class ScimGroupEndpointsIntegrationTests {
     private List<ScimGroup> scimGroups;
 
     @Before
-    public void createRestTemplate() throws Exception {
+    public void createRestTemplate() {
         client = (RestTemplate) serverRunning.getRestTemplate();
         client.setErrorHandler(new OAuth2ErrorHandler(context.getResource()) {
             // Pass errors through in response entity for status code analysis
             @Override
-            public boolean hasError(ClientHttpResponse response) throws IOException {
+            public boolean hasError(ClientHttpResponse response) {
                 return false;
             }
 
             @Override
-            public void handleError(ClientHttpResponse response) throws IOException {
+            public void handleError(ClientHttpResponse response) {
             }
         });
 
@@ -158,7 +157,7 @@ public class ScimGroupEndpointsIntegrationTests {
 
     private ScimGroup createGroup(String name, ScimGroupMember... members) {
         ScimGroup g = new ScimGroup(null, name, IdentityZoneHolder.get().getId());
-        List<ScimGroupMember> m = members != null ? Arrays.asList(members) : Collections.<ScimGroupMember>emptyList();
+        List<ScimGroupMember> m = members != null ? Arrays.asList(members) : Collections.emptyList();
         g.setMembers(m);
         ScimGroup g1 = client.postForEntity(serverRunning.getUrl(groupEndpoint), g, ScimGroup.class).getBody();
         assertEquals(name, g1.getDisplayName());
@@ -171,7 +170,7 @@ public class ScimGroupEndpointsIntegrationTests {
         HttpHeaders headers = new HttpHeaders();
         headers.add("If-Match", "*");
         ScimGroup g = new ScimGroup(null, name, IdentityZoneHolder.get().getId());
-        List<ScimGroupMember> m = members != null ? Arrays.asList(members) : Collections.<ScimGroupMember>emptyList();
+        List<ScimGroupMember> m = members != null ? Arrays.asList(members) : Collections.emptyList();
         g.setMembers(m);
         @SuppressWarnings("rawtypes")
         ResponseEntity<Map> r = client.exchange(serverRunning.getUrl(groupEndpoint + "/{id}"), HttpMethod.PUT,
@@ -184,7 +183,7 @@ public class ScimGroupEndpointsIntegrationTests {
     }
 
     private void validateUserGroups(String id, String... groups) {
-        List<String> groupNames = groups != null ? Arrays.asList(groups) : Collections.<String>emptyList();
+        List<String> groupNames = groups != null ? Arrays.asList(groups) : Collections.emptyList();
         assertEquals(groupNames.size() + defaultGroups.size(), getUser(id).getGroups().size());
         for (ScimUser.Group g : getUser(id).getGroups()) {
             assertTrue(defaultGroups.contains(g.getDisplay()) || groupNames.contains(g.getDisplay()));
@@ -214,7 +213,7 @@ public class ScimGroupEndpointsIntegrationTests {
     }
 
     @Test
-    public void createGroupSucceeds() throws Exception {
+    public void createGroupSucceeds() {
         ScimGroup g1 = createGroup(CFID);
         // Check we can GET the group
         ScimGroup g2 = client.getForObject(serverRunning.getUrl(groupEndpoint + "/{id}"), ScimGroup.class, g1.getId());
@@ -428,7 +427,7 @@ public class ScimGroupEndpointsIntegrationTests {
 
     }
 
-    private void createTestClient(String name, String secret, String scope) throws Exception {
+    private void createTestClient(String name, String secret, String scope) {
         OAuth2AccessToken token = getClientCredentialsAccessToken("clients.read,clients.write,clients.admin");
         HttpHeaders headers = getAuthenticatedHeaders(token);
         BaseClientDetails client = new BaseClientDetails(name, "", scope, "authorization_code,password",
@@ -439,7 +438,7 @@ public class ScimGroupEndpointsIntegrationTests {
         assertEquals(HttpStatus.CREATED, result.getStatusCode());
     }
 
-    private void deleteTestClient(String clientId) throws Exception {
+    private void deleteTestClient(String clientId) {
         OAuth2AccessToken token = getClientCredentialsAccessToken("clients.read,clients.write");
         HttpHeaders headers = getAuthenticatedHeaders(token);
         ResponseEntity<Void> result = serverRunning.getRestTemplate().exchange(
@@ -449,7 +448,7 @@ public class ScimGroupEndpointsIntegrationTests {
         assertEquals(HttpStatus.OK, result.getStatusCode());
     }
 
-    private OAuth2AccessToken getClientCredentialsAccessToken(String scope) throws Exception {
+    private OAuth2AccessToken getClientCredentialsAccessToken(String scope) {
 
         String clientId = testAccounts.getAdminClientId();
         String clientSecret = testAccounts.getAdminClientSecret();
@@ -459,7 +458,7 @@ public class ScimGroupEndpointsIntegrationTests {
         formData.add("client_id", clientId);
         formData.add("scope", scope);
         HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.set("Authorization",
             "Basic " + new String(Base64.encode(String.format("%s:%s", clientId, clientSecret).getBytes())));
 
@@ -475,7 +474,7 @@ public class ScimGroupEndpointsIntegrationTests {
 
     private HttpHeaders getAuthenticatedHeaders(OAuth2AccessToken token) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer " + token.getValue());
         return headers;

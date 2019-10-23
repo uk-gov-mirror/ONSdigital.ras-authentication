@@ -22,7 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.HtmlUtils;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +39,7 @@ public class PasswordGrantIntegrationTests {
     RandomValueStringGenerator generator = new RandomValueStringGenerator(36);
 
     @Test
-    public void testUserLoginViaPasswordGrant() throws Exception {
+    public void testUserLoginViaPasswordGrant() {
         ResponseEntity<String> responseEntity = makePasswordGrantRequest(testAccounts.getUserName(), testAccounts.getPassword(), "cf", "", serverRunning.getAccessTokenUri());
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
@@ -73,7 +73,7 @@ public class PasswordGrantIntegrationTests {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
-    protected BaseClientDetails addUserGroupsRequiredClient() throws Exception {
+    protected BaseClientDetails addUserGroupsRequiredClient() {
         String adminToken = IntegrationTestUtils.getClientCredentialsToken(
             serverRunning.getBaseUrl(),
             "admin",
@@ -88,11 +88,11 @@ public class PasswordGrantIntegrationTests {
         );
         client.setClientSecret("secret");
         Map<String, Object> additional = new HashMap();
-        additional.put(ClientConstants.REQUIRED_USER_GROUPS, Arrays.asList("non.existent"));
+        additional.put(ClientConstants.REQUIRED_USER_GROUPS, Collections.singletonList("non.existent"));
         client.setAdditionalInformation(additional);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(APPLICATION_JSON));
+        headers.setAccept(Collections.singletonList(APPLICATION_JSON));
         headers.add("Authorization", "Bearer "+adminToken);
         headers.setContentType(APPLICATION_JSON);
 
@@ -106,7 +106,7 @@ public class PasswordGrantIntegrationTests {
 
     private ResponseEntity<String> makePasswordGrantRequest(String userName, String password, String clientId, String clientSecret, String url) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(APPLICATION_JSON));
+        headers.setAccept(Collections.singletonList(APPLICATION_JSON));
         headers.add("Authorization", testAccounts.getAuthorizationHeader(clientId, clientSecret));
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -129,7 +129,7 @@ public class PasswordGrantIntegrationTests {
             }
 
             @Override
-            public void handleError(ClientHttpResponse response) throws IOException {
+            public void handleError(ClientHttpResponse response) {
 
             }
         });

@@ -43,16 +43,11 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.io.StringReader;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.beust.jcommander.internal.Lists.newArrayList;
-import static java.util.Arrays.asList;
 import static org.cloudfoundry.identity.uaa.mock.util.MockMvcUtils.createClient;
 import static org.cloudfoundry.identity.uaa.mock.util.MockMvcUtils.getUaaSecurityContext;
 import static org.cloudfoundry.identity.uaa.oauth.token.TokenConstants.GRANT_TYPE_PASSWORD;
@@ -253,7 +248,7 @@ class SamlAuthenticationMockMvcTests {
             idpDefinition.setStoreCustomAttributes(true);
             // External groups will only be found when there is a configured attribute name for them
             Map<String, Object> attributeMappings = new HashMap<>();
-            attributeMappings.put("external_groups", asList("authorities"));
+            attributeMappings.put("external_groups", Collections.singletonList("authorities"));
             idpDefinition.setAttributeMappings(attributeMappings);
         });
 
@@ -367,11 +362,11 @@ class SamlAuthenticationMockMvcTests {
     }
 
     private String performIdpAuthentication() throws Exception {
-        return performIdpAuthentication(asList("uaa.user"));
+        return performIdpAuthentication(Collections.singletonList("uaa.user"));
     }
 
     private String performIdpAuthentication(List<String> authorityNames) throws Exception {
-        List<GrantedAuthority> grantedAuthorityList = authorityNames.stream().map(s -> UaaAuthority.authority(s)).collect(Collectors.toList());
+        List<GrantedAuthority> grantedAuthorityList = authorityNames.stream().map(UaaAuthority::authority).collect(Collectors.toList());
         RequestPostProcessor marissa = securityContext(getUaaSecurityContext("marissa", webApplicationContext, idpZone.getId(), grantedAuthorityList));
         return mockMvc.perform(
                 get("/saml/idp/initiate")

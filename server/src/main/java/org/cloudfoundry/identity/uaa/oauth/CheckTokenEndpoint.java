@@ -85,12 +85,13 @@ public class CheckTokenEndpoint implements InitializingBean {
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         Assert.notNull(resourceServerTokenServices, "tokenServices must be set");
     }
 
     @RequestMapping(value = "/check_token", method = POST)
     @ResponseBody
+    @Deprecated
     public Claims checkToken(@RequestParam("token") String value,
                              @RequestParam(name = "scopes", required = false, defaultValue = "") List<String> scopes,
                              HttpServletRequest request) throws HttpRequestMethodNotSupportedException {
@@ -143,6 +144,7 @@ public class CheckTokenEndpoint implements InitializingBean {
 
     @RequestMapping(value = "/check_token")
     @ResponseBody
+    @Deprecated
     public Claims checkToken(HttpServletRequest request) throws HttpRequestMethodNotSupportedException {
         if (isAllowQueryString()) {
             String token = request.getParameter("token");
@@ -201,7 +203,7 @@ public class CheckTokenEndpoint implements InitializingBean {
 
 
     @ExceptionHandler(UaaException.class)
-    public ResponseEntity<UaaException> handleInvalidScopeSTUFF(UaaException e) throws Exception {
+    public ResponseEntity<UaaException> handleInvalidScopeSTUFF(UaaException e) {
         logger.info("Handling error: " + e.getClass().getSimpleName() + ", " + e.getMessage());
         return new ResponseEntity<>(e, HttpStatus.valueOf(e.getHttpStatus()));
     }

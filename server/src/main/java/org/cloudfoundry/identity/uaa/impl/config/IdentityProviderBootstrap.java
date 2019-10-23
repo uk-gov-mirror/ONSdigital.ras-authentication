@@ -245,7 +245,7 @@ public class IdentityProviderBootstrap
     public IdentityProvider getProviderByOriginIgnoreActiveFlag(String origin, String zoneId) {
         try {
             return provisioning.retrieveByOriginIgnoreActiveFlag(origin, zoneId);
-        }catch (EmptyResultDataAccessException x){
+        }catch (EmptyResultDataAccessException ignored){
         }
         return null;
 
@@ -273,7 +273,7 @@ public class IdentityProviderBootstrap
         }
     }
 
-    protected void updateDefaultZoneUaaIDP() throws JSONException {
+    protected void updateDefaultZoneUaaIDP() {
         String zoneId = IdentityZone.getUaaZoneId();
         IdentityProvider internalIDP = getProviderByOriginIgnoreActiveFlag(UAA, IdentityZone.getUaaZoneId());
         UaaIdentityProviderDefinition identityProviderDefinition = new UaaIdentityProviderDefinition(defaultPasswordPolicy, defaultLockoutPolicy, disableInternalUserManagement);

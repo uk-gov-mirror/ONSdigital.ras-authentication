@@ -26,6 +26,7 @@ import org.cloudfoundry.identity.uaa.user.UaaAuthority;
 import org.cloudfoundry.identity.uaa.user.UaaUser;
 import org.cloudfoundry.identity.uaa.user.UaaUserDatabase;
 import org.cloudfoundry.identity.uaa.util.JsonUtils;
+import org.cloudfoundry.identity.uaa.util.SessionUtils;
 import org.cloudfoundry.identity.uaa.util.SetServerNameRequestPostProcessor;
 import org.cloudfoundry.identity.uaa.util.UaaTokenUtils;
 import org.cloudfoundry.identity.uaa.util.UaaUrlUtils;
@@ -36,7 +37,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.core.Authentication;
@@ -57,7 +57,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.HtmlUtils;
@@ -66,10 +65,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
 import javax.servlet.http.HttpSession;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -169,7 +168,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
     @Test
     void token_endpoint_post_query_string_by_default() throws Exception {
-        String username = setUpUserForPasswordGrant();
+        String username = createUserForPasswordGrant(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, generator);
 
         mockMvc.perform(
                 post("/oauth/token?client_id=cf&client_secret=&grant_type=password&username={username}&password=secret", username)
@@ -181,7 +180,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     @Test
     void token_endpoint_post_query_string() throws Exception {
         webApplicationContext.getBean(UaaTokenEndpoint.class).setAllowQueryString(false);
-        String username = setUpUserForPasswordGrant();
+        String username = createUserForPasswordGrant(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, generator);
 
         mockMvc.perform(
                 post("/oauth/token?client_id=cf&client_secret=&grant_type=password&username={username}&password=secret", username)
@@ -197,7 +196,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void refresh_grant_fails_because_missing_required_groups() throws Exception {
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
-        setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
 
         String clientId = "testclient" + generator.generate();
         BaseClientDetails clientDetails = new BaseClientDetails(clientId, null, "uaa.user,other.scope", "password,refresh_token", "uaa.resource", null);
@@ -214,7 +213,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         String refreshToken = (String) tokenResponse.get(REFRESH_TOKEN);
         assertNotNull(refreshToken);
 
-        clientDetails.addAdditionalInformation(REQUIRED_USER_GROUPS, Arrays.asList("uaa.admin"));
+        clientDetails.addAdditionalInformation(REQUIRED_USER_GROUPS, Collections.singletonList("uaa.admin"));
         clientDetailsService.updateClientDetails(clientDetails);
 
         result = doRefreshGrant(refreshToken, clientId, SECRET, status().isUnauthorized());
@@ -225,12 +224,12 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void authorization_code_missing_required_scopes() throws Exception {
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
-        ScimUser user = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser user = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
 
         String clientId = "testclient" + generator.generate();
         BaseClientDetails clientDetails = new BaseClientDetails(clientId, null, "uaa.user,other.scope", GRANT_TYPE_AUTHORIZATION_CODE, "uaa.resource", "http://localhost");
         clientDetails.setClientSecret(SECRET);
-        clientDetails.addAdditionalInformation(REQUIRED_USER_GROUPS, Arrays.asList("uaa.admin"));
+        clientDetails.addAdditionalInformation(REQUIRED_USER_GROUPS, Collections.singletonList("uaa.admin"));
         clientDetailsService.addClientDetails(clientDetails);
 
         String location = mockMvc.perform(
@@ -256,11 +255,11 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void authorization_code_missing_required_scopes_during_token_fetch() throws Exception {
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
-        ScimUser user = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser user = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
 
         String clientId = "testclient" + generator.generate();
         BaseClientDetails clientDetails = new BaseClientDetails(clientId, null, "openid", GRANT_TYPE_AUTHORIZATION_CODE, "uaa.resource", "http://localhost");
-        clientDetails.setAutoApproveScopes(Arrays.asList("true"));
+        clientDetails.setAutoApproveScopes(Collections.singletonList("true"));
         clientDetails.setClientSecret(SECRET);
         clientDetailsService.addClientDetails(clientDetails);
 
@@ -280,7 +279,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         assertNotNull(code);
 
         //adding required user groups
-        clientDetails.addAdditionalInformation(REQUIRED_USER_GROUPS, Arrays.asList("uaa.admin"));
+        clientDetails.addAdditionalInformation(REQUIRED_USER_GROUPS, Collections.singletonList("uaa.admin"));
         clientDetailsService.updateClientDetails(clientDetails);
 
         MvcResult result = mockMvc.perform(
@@ -307,12 +306,12 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void token_grant_missing_required_groups() throws Exception {
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
-        setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
 
         String clientId = "testclient" + generator.generate();
         BaseClientDetails clientDetails = new BaseClientDetails(clientId, null, "uaa.user,other.scope", "password", "uaa.resource", null);
         clientDetails.setClientSecret(SECRET);
-        clientDetails.addAdditionalInformation(REQUIRED_USER_GROUPS, Arrays.asList("uaa.admin"));
+        clientDetails.addAdditionalInformation(REQUIRED_USER_GROUPS, Collections.singletonList("uaa.admin"));
         clientDetailsService.addClientDetails(clientDetails);
         MvcResult result = doPasswordGrant(username, SECRET, clientId, SECRET, status().isBadRequest());
         Map<String, Object> errorResponse = JsonUtils.readValue(
@@ -328,7 +327,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void token_grant_required_groups_are_present() throws Exception {
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user,required.scope.1,required.scope.2";
-        setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
 
         String clientId = "testclient" + generator.generate();
         BaseClientDetails clientDetails = new BaseClientDetails(clientId, null, "uaa.user,other.scope,required.scope.1,required.scope.2", "password", "uaa.resource", null);
@@ -342,7 +341,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void password_grant() throws Exception {
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
-        ScimUser user = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser user = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
         assertEquals(1, webApplicationContext.getBean(JdbcTemplate.class).update("UPDATE users SET passwd_change_required = ? WHERE ID = ?", true, user.getId()));
         doPasswordGrant(username, SECRET, "cf", "", status().is4xxClientError());
     }
@@ -351,7 +350,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void test_logon_timestamps_with_password_grant() throws Exception {
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
-        ScimUser user = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser user = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
         ScimUserProvisioning provisioning = webApplicationContext.getBean(ScimUserProvisioning.class);
         ScimUser scimUser = provisioning.retrieve(user.getId(), IdentityZoneHolder.get().getId());
         assertNull(scimUser.getLastLogonTime());
@@ -376,7 +375,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void passcode_with_client_parameters_when_password_change_required_for_user() throws Exception {
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
-        ScimUser user = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser user = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
         jdbcScimUserProvisioning.updatePasswordChangeRequired(user.getId(), true, IdentityZoneHolder.get().getId());
 
         String response = mockMvc.perform(
@@ -403,7 +402,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void passcode_with_client_parameters() throws Exception {
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
-        ScimUser user = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser user = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
 
         String content = mockMvc.perform(
                 get("/passcode")
@@ -438,7 +437,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void test_encoded_char_on_authorize_url() throws Exception {
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
-        ScimUser user = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser user = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
 
         mockMvc.perform(
                 get("/oauth/authorize")
@@ -452,11 +451,12 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     @Test
     void refresh_access_token_and_user_group_removed() throws Exception {
         String clientId = "testclient" + generator.generate();
-        setUpClients(clientId, "uaa.user", "uaa.user,uaa.admin", "password,refresh_token", true, TEST_REDIRECT_URI, Arrays.asList("uaa"));
+        setUpClients(clientId, "uaa.user", "uaa.user,uaa.admin", "password,refresh_token", true, TEST_REDIRECT_URI,
+                Collections.singletonList("uaa"));
 
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user,uaa.admin";
-        ScimUser scimUser = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser scimUser = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
 
         String response = mockMvc.perform(post("/oauth/token")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -497,11 +497,12 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     @Test
     void test_token_ids() throws Exception {
         String clientId = "testclient" + generator.generate();
-        setUpClients(clientId, "uaa.user", "uaa.user", "password,refresh_token", true, TEST_REDIRECT_URI, Arrays.asList("uaa"));
+        setUpClients(clientId, "uaa.user", "uaa.user", "password,refresh_token", true, TEST_REDIRECT_URI,
+                Collections.singletonList("uaa"));
 
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
-        setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
 
         String response = mockMvc.perform(post("/oauth/token")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -595,14 +596,11 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
         //String fullPath = "/uaa/oauth/token";
         MockHttpServletRequestBuilder post = post(fullPath)
-                .with(new RequestPostProcessor() {
-                    @Override
-                    public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
-                        request.setServerPort(8080);
-                        request.setRequestURI(fullPath);
-                        request.setServerName(host);
-                        return request;
-                    }
+                .with(request -> {
+                    request.setServerPort(8080);
+                    request.setRequestURI(fullPath);
+                    request.setServerName(host);
+                    return request;
                 })
                 .contextPath("/uaa")
                 .accept(APPLICATION_JSON)
@@ -703,11 +701,12 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     @Test
     void getOauthToken_Password_Grant_When_UAA_Provider_is_Disabled() throws Exception {
         String clientId = "testclient" + generator.generate();
-        setUpClients(clientId, "uaa.user", "uaa.user", "password", true, TEST_REDIRECT_URI, Arrays.asList("uaa"));
+        setUpClients(clientId, "uaa.user", "uaa.user", "password", true, TEST_REDIRECT_URI,
+                Collections.singletonList("uaa"));
 
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
-        setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
         setDisableInternalAuth(webApplicationContext, IdentityZone.getUaaZoneId(), true);
         try {
             mockMvc.perform(post("/oauth/token")
@@ -726,10 +725,11 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     @Test
     void token_endpoint_should_return_Basic_WWW_Authenticate_Header() throws Exception {
         String clientId = "testclient" + generator.generate();
-        setUpClients(clientId, "uaa.user", "uaa.user", GRANT_TYPE_AUTHORIZATION_CODE, true, TEST_REDIRECT_URI, Arrays.asList("uaa"));
+        setUpClients(clientId, "uaa.user", "uaa.user", GRANT_TYPE_AUTHORIZATION_CODE, true, TEST_REDIRECT_URI,
+                Collections.singletonList("uaa"));
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
         MockHttpSession session = getAuthenticatedSession(developer);
         String state = generator.generate();
         MvcResult result = mockMvc.perform(get("/oauth/authorize")
@@ -766,11 +766,12 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     @Test
     void getOauthToken_usingAuthCode_withClientIdAndSecretInRequestBody_shouldBeOk() throws Exception {
         String clientId = "testclient" + generator.generate();
-        setUpClients(clientId, "uaa.user", "uaa.user", GRANT_TYPE_AUTHORIZATION_CODE, true, TEST_REDIRECT_URI, Arrays.asList("uaa"));
+        setUpClients(clientId, "uaa.user", "uaa.user", GRANT_TYPE_AUTHORIZATION_CODE, true, TEST_REDIRECT_URI,
+                Collections.singletonList("uaa"));
 
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
 
         MockHttpSession session = getAuthenticatedSession(developer);
 
@@ -808,7 +809,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         BaseClientDetails clientWithoutRefreshTokenGrant = setUpClients("testclient" + generator.generate(), "", "openid", GRANT_TYPE_AUTHORIZATION_CODE, true);
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user,other.scope,openid";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
         MockHttpSession session = getAuthenticatedSession(developer);
 
         MvcResult result = mockMvc.perform(get("/oauth/authorize")
@@ -839,15 +840,15 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void refreshAccessToken_withClient_withAutoApproveField() throws Exception {
         String clientId = "testclient" + generator.generate();
         BaseClientDetails clientDetails = new BaseClientDetails(clientId, null, "uaa.user,other.scope", "authorization_code,refresh_token", "uaa.resource", TEST_REDIRECT_URI);
-        clientDetails.setAutoApproveScopes(Arrays.asList("uaa.user"));
+        clientDetails.setAutoApproveScopes(Collections.singletonList("uaa.user"));
         clientDetails.setClientSecret("secret");
-        clientDetails.addAdditionalInformation(ClientConstants.AUTO_APPROVE, Arrays.asList("other.scope"));
-        clientDetails.addAdditionalInformation(ClientConstants.ALLOWED_PROVIDERS, Arrays.asList("uaa"));
+        clientDetails.addAdditionalInformation(ClientConstants.AUTO_APPROVE, Collections.singletonList("other.scope"));
+        clientDetails.addAdditionalInformation(ClientConstants.ALLOWED_PROVIDERS, Collections.singletonList("uaa"));
         clientDetailsService.addClientDetails(clientDetails);
 
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user,other.scope";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
 
         MockHttpSession session = getAuthenticatedSession(developer);
 
@@ -889,10 +890,10 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void authorizeEndpointWithPromptNone_WhenNotAuthenticated() throws Exception {
         String clientId = "testclient" + generator.generate();
         BaseClientDetails clientDetails = new BaseClientDetails(clientId, null, "uaa.user,other.scope", "authorization_code,refresh_token", "uaa.resource", TEST_REDIRECT_URI);
-        clientDetails.setAutoApproveScopes(Arrays.asList("uaa.user"));
+        clientDetails.setAutoApproveScopes(Collections.singletonList("uaa.user"));
         clientDetails.setClientSecret("secret");
-        clientDetails.addAdditionalInformation(ClientConstants.AUTO_APPROVE, Arrays.asList("other.scope"));
-        clientDetails.addAdditionalInformation(ClientConstants.ALLOWED_PROVIDERS, Arrays.asList("uaa"));
+        clientDetails.addAdditionalInformation(ClientConstants.AUTO_APPROVE, Collections.singletonList("other.scope"));
+        clientDetails.addAdditionalInformation(ClientConstants.ALLOWED_PROVIDERS, Collections.singletonList("uaa"));
         clientDetailsService.addClientDetails(clientDetails);
 
         MockHttpSession session = new MockHttpSession();
@@ -918,15 +919,15 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void testAuthorizeEndpointWithPromptNone_MfaRequired() throws Exception {
         String clientId = "testclient" + generator.generate();
         BaseClientDetails clientDetails = new BaseClientDetails(clientId, null, "uaa.user,other.scope", "authorization_code,refresh_token", "uaa.resource", TEST_REDIRECT_URI);
-        clientDetails.setAutoApproveScopes(Arrays.asList("uaa.user"));
+        clientDetails.setAutoApproveScopes(Collections.singletonList("uaa.user"));
         clientDetails.setClientSecret("secret");
-        clientDetails.addAdditionalInformation(ClientConstants.AUTO_APPROVE, Arrays.asList("other.scope"));
-        clientDetails.addAdditionalInformation(ClientConstants.ALLOWED_PROVIDERS, Arrays.asList("uaa"));
+        clientDetails.addAdditionalInformation(ClientConstants.AUTO_APPROVE, Collections.singletonList("other.scope"));
+        clientDetails.addAdditionalInformation(ClientConstants.ALLOWED_PROVIDERS, Collections.singletonList("uaa"));
         clientDetailsService.addClientDetails(clientDetails);
 
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user,other.scope";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
         super.setupForMfaPasswordGrant(developer.getId());
 
         MockHttpSession session = getAuthenticatedSession(developer);
@@ -969,15 +970,15 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void testAuthorizeEndpointWithPromptNone_ForcePasswordChangeRequired() throws Exception {
         String clientId = "testclient" + generator.generate();
         BaseClientDetails clientDetails = new BaseClientDetails(clientId, null, "uaa.user,other.scope", "authorization_code,refresh_token", "uaa.resource", TEST_REDIRECT_URI);
-        clientDetails.setAutoApproveScopes(Arrays.asList("uaa.user"));
+        clientDetails.setAutoApproveScopes(Collections.singletonList("uaa.user"));
         clientDetails.setClientSecret("secret");
-        clientDetails.addAdditionalInformation(ClientConstants.AUTO_APPROVE, Arrays.asList("other.scope"));
-        clientDetails.addAdditionalInformation(ClientConstants.ALLOWED_PROVIDERS, Arrays.asList("uaa"));
+        clientDetails.addAdditionalInformation(ClientConstants.AUTO_APPROVE, Collections.singletonList("other.scope"));
+        clientDetails.addAdditionalInformation(ClientConstants.ALLOWED_PROVIDERS, Collections.singletonList("uaa"));
         clientDetailsService.addClientDetails(clientDetails);
 
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user,other.scope";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
         MockHttpSession session = new MockHttpSession();
         setAuthentication(session, developer, true, "pwd", "mfa", "otp");
 
@@ -1019,15 +1020,15 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void testAuthorizeEndpointWithPromptNone_Authenticated() throws Exception {
         String clientId = "testclient" + generator.generate();
         BaseClientDetails clientDetails = new BaseClientDetails(clientId, null, "uaa.user,other.scope", "authorization_code,refresh_token", "uaa.resource", TEST_REDIRECT_URI);
-        clientDetails.setAutoApproveScopes(Arrays.asList("uaa.user"));
+        clientDetails.setAutoApproveScopes(Collections.singletonList("uaa.user"));
         clientDetails.setClientSecret("secret");
-        clientDetails.addAdditionalInformation(ClientConstants.AUTO_APPROVE, Arrays.asList("other.scope"));
-        clientDetails.addAdditionalInformation(ClientConstants.ALLOWED_PROVIDERS, Arrays.asList("uaa"));
+        clientDetails.addAdditionalInformation(ClientConstants.AUTO_APPROVE, Collections.singletonList("other.scope"));
+        clientDetails.addAdditionalInformation(ClientConstants.ALLOWED_PROVIDERS, Collections.singletonList("uaa"));
         clientDetailsService.addClientDetails(clientDetails);
 
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user,other.scope";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
 
         MockHttpSession session = getAuthenticatedSession(developer);
 
@@ -1050,11 +1051,12 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     @Test
     void getOauthToken_usingPassword_withClientIdAndSecretInRequestBody_shouldBeOk() throws Exception {
         String clientId = "testclient" + generator.generate();
-        setUpClients(clientId, "uaa.user", "uaa.user", "password", true, TEST_REDIRECT_URI, Arrays.asList("uaa"));
+        setUpClients(clientId, "uaa.user", "uaa.user", "password", true, TEST_REDIRECT_URI,
+                Collections.singletonList("uaa"));
 
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
-        setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
 
         mockMvc.perform(post("/oauth/token")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -1069,11 +1071,12 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     @Test
     void getOauthToken_usingPassword_withNoCommonScopes_shouldBeUnauthorized() throws Exception {
         String clientId = "testclient" + generator.generate();
-        setUpClients(clientId, "uaa.user", "something_else", "password", true, TEST_REDIRECT_URI, Arrays.asList("uaa"));
+        setUpClients(clientId, "uaa.user", "something_else", "password", true, TEST_REDIRECT_URI,
+                Collections.singletonList("uaa"));
 
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
-        setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
 
         MvcResult result = mockMvc.perform(post("/oauth/token")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -1092,7 +1095,8 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     @Test
     void getOauthToken_usingClientCredentials_withClientIdAndSecretInRequestBody_shouldBeOk() throws Exception {
         String clientId = "testclient" + generator.generate();
-        setUpClients(clientId, "uaa.user", "uaa.user", "client_credentials", true, TEST_REDIRECT_URI, Arrays.asList("uaa"));
+        setUpClients(clientId, "uaa.user", "uaa.user", "client_credentials", true, TEST_REDIRECT_URI,
+                Collections.singletonList("uaa"));
 
         mockMvc.perform(post("/oauth/token")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -1113,14 +1117,15 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         IdentityProvider provider = setupIdentityProvider(OriginKeys.UAA);
 
         String clientId2 = "testclient" + generator.generate();
-        setUpClients(clientId2, scopes, scopes, "authorization_code,password", true, TEST_REDIRECT_URI, Arrays.asList(provider.getOriginKey()));
+        setUpClients(clientId2, scopes, scopes, "authorization_code,password", true, TEST_REDIRECT_URI,
+                Collections.singletonList(provider.getOriginKey()));
 
         String clientId = "testclient" + generator.generate();
         setUpClients(clientId, scopes, scopes, "authorization_code,password", true, TEST_REDIRECT_URI, null);
 
         String username = "testuser" + generator.generate();
         String userScopes = "space.1.developer,space.2.developer,org.1.reader,org.2.reader,org.12345.admin,scope.one,scope.two,scope.three,openid";
-        setUpUser(username, userScopes, OriginKeys.UAA, testZone.getId());
+        setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, testZone.getId());
 
         mockMvc.perform(post("/oauth/token")
                 .with(new SetServerNameRequestPostProcessor(subdomain + ".localhost"))
@@ -1147,7 +1152,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void getToken_withPasswordGrantType_resultsInUserLastLogonTimestampUpdate() throws Exception {
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user";
-        ScimUser user = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser user = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
         webApplicationContext.getBean(UaaUserDatabase.class).updateLastLogonTime(user.getId());
         webApplicationContext.getBean(UaaUserDatabase.class).updateLastLogonTime(user.getId());
 
@@ -1204,14 +1209,16 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         setUpClients(clientId, scopes, scopes, "authorization_code,password", true, TEST_REDIRECT_URI, null);
 
         String clientId2 = "testclient" + generator.generate();
-        setUpClients(clientId2, scopes, scopes, "authorization_code,password", true, TEST_REDIRECT_URI, Arrays.asList(provider.getOriginKey()));
+        setUpClients(clientId2, scopes, scopes, "authorization_code,password", true, TEST_REDIRECT_URI,
+                Collections.singletonList(provider.getOriginKey()));
 
         String clientId3 = "testclient" + generator.generate();
-        setUpClients(clientId3, scopes, scopes, "authorization_code,password", true, TEST_REDIRECT_URI, Arrays.asList(OriginKeys.LOGIN_SERVER));
+        setUpClients(clientId3, scopes, scopes, "authorization_code,password", true, TEST_REDIRECT_URI,
+                Collections.singletonList(OriginKeys.LOGIN_SERVER));
 
         String username = "testuser" + generator.generate();
         String userScopes = "space.1.developer,space.2.developer,org.1.reader,org.2.reader,org.12345.admin,scope.one,scope.two,scope.three,openid";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, testZone.getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, testZone.getId());
 
         MockHttpSession session = getAuthenticatedSession(developer);
 
@@ -1270,13 +1277,14 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         String idpOrigin = "origin-" + generator.generate();
         IdentityProvider provider = setupIdentityProvider(idpOrigin);
 
-        setUpClients(clientId, scopes, scopes, "authorization_code,password", true, TEST_REDIRECT_URI, Arrays.asList(provider.getOriginKey()));
+        setUpClients(clientId, scopes, scopes, "authorization_code,password", true, TEST_REDIRECT_URI,
+                Collections.singletonList(provider.getOriginKey()));
         setUpClients(clientId2, scopes, scopes, "authorization_code,password", true, TEST_REDIRECT_URI, null);
 
         //create a user in the UAA identity provider
         String username = "testuser" + generator.generate();
         String userScopes = "space.1.developer,space.2.developer,org.1.reader,org.2.reader,org.12345.admin,scope.one,scope.two,scope.three,openid";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
 
 
         mockMvc.perform(post("/oauth/token")
@@ -1310,7 +1318,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
         String username = "testuser" + generator.generate();
         String userScopes = "";
-        setUpUser(username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
 
         String uaaUserAccessToken = getUserOAuthAccessToken(
                 mockMvc,
@@ -1375,7 +1383,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.offline_token";
-        setUpUser(username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
 
         MockHttpServletRequestBuilder oauthTokenPost = post("/oauth/token")
                 .param("username", username)
@@ -1398,7 +1406,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.offline_token";
-        setUpUser(username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
 
         MockHttpServletRequestBuilder oauthTokenPost = post("/oauth/token")
                 .param("username", username)
@@ -1429,7 +1437,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
             setUpClients(clientId, scopes, scopes, GRANT_TYPE_AUTHORIZATION_CODE, true);
             String username = "testuser" + generator.generate();
             String userScopes = "space.1.developer,space.2.developer,org.1.reader,org.2.reader,org.12345.admin,scope.one,scope.two,scope.three,openid";
-            ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+            ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
 
             MockHttpSession session = getAuthenticatedSession(developer);
 
@@ -1464,7 +1472,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         setUpClients(clientId, scopes, scopes, GRANT_TYPE_AUTHORIZATION_CODE, true);
         String username = "testuser" + generator.generate();
         String userScopes = "space.1.developer,space.2.developer,org.1.reader,org.2.reader,org.12345.admin,scope.one,scope.two,scope.three,openid";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
 
         MockHttpSession session = getAuthenticatedSession(developer);
 
@@ -1496,7 +1504,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         setUpClients(clientId, scopes, scopes, "implicit,authorization_code", false);
         String username = "testuser" + new RandomValueStringGenerator().generate();
         String userScopes = "space.1.developer,space.2.developer,org.1.reader,org.2.reader,org.12345.admin,scope.one,scope.two,scope.three,openid";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
 
         MockHttpSession session = getAuthenticatedSession(developer);
 
@@ -1524,7 +1532,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         setUpClients(clientId, scopes, scopes, GRANT_TYPE_AUTHORIZATION_CODE, false);
         String username = "testuser" + generator.generate();
         String userScopes = "space.1.developer,space.2.developer,org.1.reader,org.2.reader,org.12345.admin,scope.one,scope.two,scope.three,openid";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
 
         MockHttpSession session = getAuthenticatedSession(developer);
 
@@ -1532,7 +1540,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest();
         authorizationRequest.setClientId(clientId);
         authorizationRequest.setRedirectUri(TEST_REDIRECT_URI);
-        authorizationRequest.setScope(new ArrayList<>(Arrays.asList("openid")));
+        authorizationRequest.setScope(new ArrayList<>(Collections.singletonList("openid")));
         authorizationRequest.setResponseTypes(new TreeSet<>(Arrays.asList("code", "id_token")));
         authorizationRequest.setState(state);
 
@@ -1561,7 +1569,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         setUpClients(clientId, scopes, scopes, GRANT_TYPE_AUTHORIZATION_CODE, false);
         String username = "testuser" + generator.generate();
         String userScopes = "space.1.developer,space.2.developer,org.1.reader,org.2.reader,org.12345.admin,scope.one,scope.two,scope.three,openid";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
 
         MockHttpSession session = getAuthenticatedSession(developer);
 
@@ -1570,7 +1578,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest();
         authorizationRequest.setClientId(clientId);
         authorizationRequest.setRedirectUri(TEST_REDIRECT_URI);
-        authorizationRequest.setScope(new ArrayList<>(Arrays.asList("openid")));
+        authorizationRequest.setScope(new ArrayList<>(Collections.singletonList("openid")));
         authorizationRequest.setResponseTypes(new TreeSet<>(Arrays.asList("code", "id_token")));
         authorizationRequest.setState(state);
         session.setAttribute("authorizationRequest", authorizationRequest);
@@ -1601,7 +1609,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         setUpClients(clientId, scopes, scopes, GRANT_TYPES, true, redirectUri);
         String username = "authuser" + generator.generate();
         String userScopes = "openid";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
         MockHttpSession session = getAuthenticatedSession(developer);
 
         String state = generator.generate();
@@ -1627,7 +1635,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         setUpClients(clientId, scopes, scopes, GRANT_TYPE_AUTHORIZATION_CODE, true);
 
         String username = "testuser" + generator.generate();
-        ScimUser developer = setUpUser(username, "scim.write", OriginKeys.UAA, IdentityZoneHolder.getUaaZone().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, "scim.write", OriginKeys.UAA, IdentityZoneHolder.getUaaZone().getId());
         MockHttpSession session = getAuthenticatedSession(developer);
 
         String state = generator.generate();
@@ -1645,7 +1653,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         UriComponents locationComponents = UriComponentsBuilder.fromUri(URI.create(mvcResult.getResponse().getHeader("Location"))).build();
         MultiValueMap<String, String> queryParams = locationComponents.getQueryParams();
         String errorMessage = URIUtil.encodeQuery("scim.write is invalid. Please use a valid scope name in the request");
-        assertTrue(!queryParams.containsKey("scope"));
+        assertFalse(queryParams.containsKey("scope"));
         assertEquals(errorMessage, queryParams.getFirst("error_description"));
     }
 
@@ -1656,7 +1664,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         setUpClients(clientId, scopes, scopes, GRANT_TYPE_AUTHORIZATION_CODE, true);
 
         String username = "testuser" + generator.generate();
-        ScimUser developer = setUpUser(username, "openid", OriginKeys.UAA, IdentityZoneHolder.getUaaZone().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, "openid", OriginKeys.UAA, IdentityZoneHolder.getUaaZone().getId());
         MockHttpSession session = getAuthenticatedSession(developer);
 
         String state = generator.generate();
@@ -1674,7 +1682,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         UriComponents locationComponents = UriComponentsBuilder.fromUri(URI.create(mvcResult.getResponse().getHeader("Location"))).build();
         MultiValueMap<String, String> queryParams = locationComponents.getQueryParams();
         String errorMessage = URIUtil.encodeQuery("[something.else] is invalid. This user is not allowed any of the requested scopes");
-        assertTrue(!queryParams.containsKey("scope"));
+        assertFalse(queryParams.containsKey("scope"));
         assertEquals(errorMessage, queryParams.getFirst("error_description"));
     }
 
@@ -1701,7 +1709,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     @Test
     void test_authorization_code_grant_session_expires_during_app_approval() throws Exception {
         String username = "authuser" + generator.generate();
-        ScimUser user = setUpUser(username, "", OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser user = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, "", OriginKeys.UAA, IdentityZoneHolder.get().getId());
 
         String redirectUri = "http://localhost:8080/app/";
         String clientId = "authclient-" + generator.generate();
@@ -1739,7 +1747,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         setUpClients(clientId, scopes, scopes, GRANT_TYPES, true, redirectUri);
         String username = "authuser" + generator.generate();
         String userScopes = "openid";
-        ScimUser user = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser user = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
         String state = generator.generate();
 
         String authUrl = "http://localhost" + UriComponentsBuilder
@@ -1826,7 +1834,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     @Test
     void test_valid_redirect_uri() throws Exception {
         String redirectUri = "https://example.com/**";
-        test_invalid_registered_redirect_uris(new HashSet(Arrays.asList(redirectUri)), status().isFound());
+        test_invalid_registered_redirect_uris(new HashSet(Collections.singletonList(redirectUri)), status().isFound());
     }
 
     @Test
@@ -1838,7 +1846,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         setUpClients(clientId, scopes, scopes, GRANT_TYPES, true, redirectUri);
         String username = "authuser" + generator.generate();
         String userScopes = "openid";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
         MockHttpSession session = getAuthenticatedSession(developer);
 
         String state = generator.generate();
@@ -1946,7 +1954,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         setUpClients(clientId, scopes, scopes, GRANT_TYPES, true, redirectUri);
         String username = "authuser" + generator.generate();
         String userScopes = "openid";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
         MockHttpSession session = getAuthenticatedSession(developer);
 
 
@@ -1970,7 +1978,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void gettingOpenIdToken_withPasswordGrantType_usingBasicAuth() throws Exception {
         String clientId = "password-grant-client" + this.generator.generate();
         setUpClients(clientId, "", "openid", "password,refresh_token", true);
-        ScimUser developer = setUpUser("testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, "testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
         logUserInTwice(developer.getId());
 
         MockHttpServletRequestBuilder oauthTokenPost = post("/oauth/token")
@@ -1995,7 +2003,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void gettingOpenIdToken_withPasswordGrantType_withoutBasicAuth() throws Exception {
         String clientId = "password-grant-client" + this.generator.generate();
         setUpClients(clientId, "", "openid", "password,refresh_token", true);
-        ScimUser developer = setUpUser("testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, "testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
         logUserInTwice(developer.getId());
 
         MvcResult result = mockMvc.perform(post("/oauth/token")
@@ -2023,7 +2031,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void legacyUserAuthentication_IdTokenRequest() throws Exception {
         String clientId = "implicit-grant-client" + this.generator.generate();
         setUpClients(clientId, "", "openid", "implicit,refresh_token", true, TEST_REDIRECT_URI);
-        ScimUser developer = setUpUser("testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, "testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
         logUserInTwice(developer.getId());
 
         //request for id_token using our old-style direct authentication
@@ -2052,7 +2060,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void gettingOpenIdToken_withAuthorizationCodeGrantType_withBasicAuth() throws Exception {
         String clientId = "authcode-client" + this.generator.generate();
         setUpClients(clientId, "", "openid", "authorization_code,refresh_token", true, TEST_REDIRECT_URI);
-        ScimUser developer = setUpUser("testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, "testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
         logUserInTwice(developer.getId());
         MockHttpSession session = new MockHttpSession();
         setAuthentication(session, developer);
@@ -2103,7 +2111,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         //http://openid.net/specs/openid-connect-core-1_0.html#HybridFlowAuth
         String clientId = "hybrid-client" + this.generator.generate();
         setUpClients(clientId, "", "openid", "authorization_code,implicit,refresh_token", true, TEST_REDIRECT_URI);
-        ScimUser developer = setUpUser("testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, "testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
         logUserInTwice(developer.getId());
         MockHttpSession session = new MockHttpSession();
         setAuthentication(session, developer);
@@ -2159,7 +2167,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void gettingOpenIdToken_HybridFlow_withCodePlusIdToken() throws Exception {
         String clientId = "hybrid-client" + this.generator.generate();
         setUpClients(clientId, "", "openid", "authorization_code,implicit,refresh_token", true, TEST_REDIRECT_URI);
-        ScimUser developer = setUpUser("testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, "testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
         logUserInTwice(developer.getId());
         MockHttpSession session = new MockHttpSession();
         setAuthentication(session, developer);
@@ -2215,7 +2223,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void gettingOpenIdToken_HybridFlow_withCodePlusToken() throws Exception {
         String clientId = "hybrid-client" + this.generator.generate();
         setUpClients(clientId, "", "openid", "authorization_code,implicit,refresh_token", true, TEST_REDIRECT_URI);
-        ScimUser developer = setUpUser("testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, "testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
         logUserInTwice(developer.getId());
         MockHttpSession session = new MockHttpSession();
         setAuthentication(session, developer);
@@ -2270,7 +2278,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void gettingOpenIdToken_withAuthorizationCodeGrantType() throws Exception {
         String clientId = "authcode-client" + this.generator.generate();
         setUpClients(clientId, "", "openid", "authorization_code,refresh_token", true, TEST_REDIRECT_URI);
-        ScimUser developer = setUpUser("testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, "testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
         logUserInTwice(developer.getId());
         MockHttpSession session = new MockHttpSession();
         setAuthentication(session, developer);
@@ -2324,7 +2332,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void attemptingToGetOpenIdToken_withAuthorizationCodeGrantType_whenClientMissingOpenidScope() throws Exception {
         String clientId = "authcode-client" + this.generator.generate();
         setUpClients(clientId, "", "not-openid,foo.read", "authorization_code,refresh_token", true, TEST_REDIRECT_URI);
-        ScimUser developer = setUpUser("testuser" + this.generator.generate(), "not-openid,foo.read", OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, "testuser" + this.generator.generate(), "not-openid,foo.read", OriginKeys.UAA, IdentityZoneHolder.get().getId());
         logUserInTwice(developer.getId());
         MockHttpSession session = new MockHttpSession();
         setAuthentication(session, developer);
@@ -2376,7 +2384,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         //response type token+id_token after a regular auth_code flow
         String clientId = "hybrid-client" + this.generator.generate();
         setUpClients(clientId, "", "openid", "authorization_code,implicit,refresh_token", true, TEST_REDIRECT_URI);
-        ScimUser developer = setUpUser("testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, "testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
         logUserInTwice(developer.getId());
         MockHttpSession session = new MockHttpSession();
         setAuthentication(session, developer);
@@ -2422,7 +2430,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void gettingOpenIdToken_andNoAccessToken_withImplicitGrantType() throws Exception {
         String clientId = "implicit-client" + this.generator.generate();
         setUpClients(clientId, "", "openid", "implicit,refresh_token", true, TEST_REDIRECT_URI);
-        ScimUser developer = setUpUser("testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, "testuser" + this.generator.generate(), "openid", OriginKeys.UAA, IdentityZoneHolder.get().getId());
         logUserInTwice(developer.getId());
         MockHttpSession session = new MockHttpSession();
         setAuthentication(session, developer);
@@ -2456,7 +2464,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
         String userId = "testuser" + generator.generate();
         String userScopes = "space.1.developer,space.2.developer,org.1.reader,org.2.reader,org.12345.admin,scope.one,scope.two,scope.three";
-        ScimUser developer = setUpUser(userId, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, userId, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
 
         Set<String> allUserScopes = new HashSet<>();
         allUserScopes.addAll(defaultAuthorities);
@@ -2483,7 +2491,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         Calendar nineYearsAhead = new GregorianCalendar();
         nineYearsAhead.setTimeInMillis(System.currentTimeMillis());
         nineYearsAhead.add(Calendar.YEAR, 9);
-        assertTrue("Expiration Date should be more than 9 years ahead.", new Date(expirationTime * 1000l).after(new Date(nineYearsAhead.getTimeInMillis())));
+        assertTrue("Expiration Date should be more than 9 years ahead.", new Date(expirationTime * 1000L).after(new Date(nineYearsAhead.getTimeInMillis())));
     }
 
     @Test
@@ -2491,11 +2499,11 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         String clientId = "testclient" + generator.generate();
         String scopes = "*.*";
         Map<String, Object> additional = new HashMap();
-        additional.put(ClientConstants.REQUIRED_USER_GROUPS, Arrays.asList("non.existent"));
+        additional.put(ClientConstants.REQUIRED_USER_GROUPS, Collections.singletonList("non.existent"));
         setUpClients(clientId, scopes, scopes, GRANT_TYPES, true, null, null, -1, null, additional);
         String userId = "testuser" + generator.generate();
         String userScopes = "scope.one,scope.two,scope.three";
-        ScimUser developer = setUpUser(userId, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, userId, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
 
         mockMvc.perform(
                 post("/oauth/token")
@@ -2526,7 +2534,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
         String userId = "testuser" + generator.generate();
         String userScopes = "space.1.developer,space.2.developer,org.1.reader,org.2.reader,org.12345.admin,scope.one,scope.two,scope.three";
-        ScimUser developer = setUpUser(userId, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, userId, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
 
         Set<String> allUserScopes = new HashSet<>();
         allUserScopes.addAll(defaultAuthorities);
@@ -2551,14 +2559,14 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
                 userId,
                 subdomain,
                 "space.2.developer",
-                Arrays.asList("space.2.developer")
+                Collections.singletonList("space.2.developer")
         );
         validatePasswordGrantToken(
                 clientId,
                 userId,
                 subdomain,
                 "org.123*.admin",
-                Arrays.asList("org.12345.admin")
+                Collections.singletonList("org.12345.admin")
         );
         validatePasswordGrantToken(
                 clientId,
@@ -2647,7 +2655,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         setUpClients(clientId, scopes, scopes, GRANT_TYPES, true);
         String userId = "testuser" + generator.generate();
         String userScopes = "space.1.developer,space.2.developer,org.1.reader,org.2.reader,org.12345.admin,scope.one,scope.two,scope.three";
-        ScimUser developer = setUpUser(userId, userScopes, OriginKeys.LOGIN_SERVER, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, userId, userScopes, OriginKeys.LOGIN_SERVER, IdentityZoneHolder.get().getId());
         String loginToken = testClient.getClientCredentialsOAuthAccessToken("login", "loginsecret", "");
         String basicAuthForLoginClient = new String(Base64.encode(String.format("%s:%s", "login", "loginsecret").getBytes()));
 
@@ -2854,7 +2862,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
         String userId = "testuser" + generator.generate();
         String userScopes = "space.1.developer,space.2.developer,org.1.reader,org.2.reader,org.12345.admin,scope.one,scope.two,scope.three";
-        ScimUser developer = setUpUser(userId, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, userId, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
         String loginToken = testClient.getClientCredentialsOAuthAccessToken(oauthClientId, SECRET, "");
 
         //failure - success only if token has oauth.login
@@ -3026,7 +3034,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
         String userId = "testuser" + generator.generate();
         String userScopes = "space.1.developer,space.2.developer,org.1.reader,org.2.reader,org.12345.admin,scope.one,scope.two,scope.three,uaa.user";
-        ScimUser developer = setUpUser(userId, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, userId, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
         String basicAuthForOauthClient = new String(Base64.encode(String.format("%s:%s", oauthClientId, SECRET).getBytes()));
 
         //success - regular password grant but client is authenticated using POST parameters
@@ -3404,7 +3412,8 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         IdentityZoneHolder.clear();
         String clientId = "testclient" + generator.generate();
         String scopes = "cloud_controller.read";
-        setUpClients(clientId, scopes, scopes, "password,client_credentials", true, TEST_REDIRECT_URI, Arrays.asList(OriginKeys.UAA));
+        setUpClients(clientId, scopes, scopes, "password,client_credentials", true, TEST_REDIRECT_URI,
+                Collections.singletonList(OriginKeys.UAA));
         setUpUser(username);
         IdentityZoneHolder.clear();
         mockMvc.perform(post("/oauth/token")
@@ -3434,7 +3443,8 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         identityProviderProvisioning.update(provider, provider.getIdentityZoneId());
         String clientId = "testclient" + generator.generate();
         String scopes = "cloud_controller.read";
-        setUpClients(clientId, scopes, scopes, "password,client_credentials", true, TEST_REDIRECT_URI, Arrays.asList(provider.getOriginKey()));
+        setUpClients(clientId, scopes, scopes, "password,client_credentials", true, TEST_REDIRECT_URI,
+                Collections.singletonList(provider.getOriginKey()));
         setUpUser(username);
         IdentityZoneHolder.clear();
 
@@ -3572,9 +3582,9 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
         String zoneAdminGroup = "zones." + generator.generate() + ".admin";
         ScimGroup group = new ScimGroup(null, zoneAdminGroup, IdentityZone.getUaaZoneId());
-        group = groupProvisioning.create(group, IdentityZoneHolder.get().getId());
+        group = jdbcScimGroupProvisioning.create(group, IdentityZoneHolder.get().getId());
         ScimGroupMember member = new ScimGroupMember(user.getId());
-        groupMembershipManager.addMember(group.getId(), member, IdentityZoneHolder.get().getId());
+        jdbcScimGroupMembershipManager.addMember(group.getId(), member, IdentityZoneHolder.get().getId());
 
         MockHttpSession session = getAuthenticatedSession(user);
 
@@ -3619,9 +3629,9 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
         String zoneadmingroup = "zones." + generator.generate() + ".admin";
         ScimGroup group = new ScimGroup(null, zoneadmingroup, IdentityZone.getUaaZoneId());
-        group = groupProvisioning.create(group, IdentityZoneHolder.get().getId());
+        group = jdbcScimGroupProvisioning.create(group, IdentityZoneHolder.get().getId());
         ScimGroupMember member = new ScimGroupMember(user.getId());
-        groupMembershipManager.addMember(group.getId(), member, IdentityZoneHolder.get().getId());
+        jdbcScimGroupMembershipManager.addMember(group.getId(), member, IdentityZoneHolder.get().getId());
 
         MockHttpSession session = getAuthenticatedSession(user);
 
@@ -3643,7 +3653,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         Map<String, String[]> mapResponse = UaaUrlUtils.getParameterMap(result.getResponse().getRedirectedUrl());
         for (String key : mapResponse.keySet()) {
             assertTrue(mapRequest.containsKey(key));
-            assertTrue(Arrays.equals(mapRequest.get(key), mapResponse.get(key)));
+            assertArrayEquals(mapRequest.get(key), mapResponse.get(key));
         }
         Set<String> requestKeys = new HashSet(mapRequest.keySet());
         requestKeys.removeAll(mapResponse.keySet());
@@ -3658,9 +3668,9 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
         String zoneadmingroup = "zones." + generator.generate() + ".admin";
         ScimGroup group = new ScimGroup(null, zoneadmingroup, IdentityZone.getUaaZoneId());
-        group = groupProvisioning.create(group, IdentityZoneHolder.get().getId());
+        group = jdbcScimGroupProvisioning.create(group, IdentityZoneHolder.get().getId());
         ScimGroupMember member = new ScimGroupMember(user.getId());
-        groupMembershipManager.addMember(group.getId(), member, IdentityZoneHolder.get().getId());
+        jdbcScimGroupMembershipManager.addMember(group.getId(), member, IdentityZoneHolder.get().getId());
 
         MockHttpSession session = getAuthenticatedSession(user);
 
@@ -3697,7 +3707,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         Map<String, String[]> mapResponse = UaaUrlUtils.getParameterMap(result.getResponse().getRedirectedUrl());
         for (String key : mapResponse.keySet()) {
             assertTrue(mapRequest.containsKey(key));
-            assertTrue(Arrays.equals(mapRequest.get(key), mapResponse.get(key)));
+            assertArrayEquals(mapRequest.get(key), mapResponse.get(key));
         }
         Set<String> requestKeys = new HashSet(mapRequest.keySet());
         requestKeys.removeAll(mapResponse.keySet());
@@ -3940,15 +3950,15 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     void authorizationCanRedirectToSubpathOfConfiguredRedirect() throws Exception {
         String clientId = "testclient" + generator.generate();
         BaseClientDetails clientDetails = new BaseClientDetails(clientId, null, "uaa.user,other.scope", "authorization_code,refresh_token", "uaa.resource", TEST_REDIRECT_URI);
-        clientDetails.setAutoApproveScopes(Arrays.asList("uaa.user"));
+        clientDetails.setAutoApproveScopes(Collections.singletonList("uaa.user"));
         clientDetails.setClientSecret("secret");
-        clientDetails.addAdditionalInformation(ClientConstants.AUTO_APPROVE, Arrays.asList("other.scope"));
-        clientDetails.addAdditionalInformation(ClientConstants.ALLOWED_PROVIDERS, Arrays.asList("uaa"));
+        clientDetails.addAdditionalInformation(ClientConstants.AUTO_APPROVE, Collections.singletonList("other.scope"));
+        clientDetails.addAdditionalInformation(ClientConstants.ALLOWED_PROVIDERS, Collections.singletonList("uaa"));
         clientDetailsService.addClientDetails(clientDetails);
 
         String username = "testuser" + generator.generate();
         String userScopes = "uaa.user,other.scope";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZone.getUaaZoneId());
 
         MockHttpSession session = getAuthenticatedSession(developer);
 
@@ -4006,7 +4016,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
         String username = "authuser" + generator.generate();
         String userScopes = "openid";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
         MockHttpSession session = getAuthenticatedSession(developer);
 
 
@@ -4050,16 +4060,16 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
     }
 
-    private static Map<String, List<String>> splitQuery(URL url) throws UnsupportedEncodingException {
+    private static Map<String, List<String>> splitQuery(URL url) {
         Map<String, List<String>> params = new LinkedHashMap<>();
         String[] kv = url.getQuery().split("&");
         for (String pair : kv) {
             int i = pair.indexOf("=");
-            String key = i > 0 ? URLDecoder.decode(pair.substring(0, i), "UTF-8") : pair;
+            String key = i > 0 ? URLDecoder.decode(pair.substring(0, i), StandardCharsets.UTF_8) : pair;
             if (!params.containsKey(key)) {
                 params.put(key, new LinkedList<String>());
             }
-            String value = i > 0 && pair.length() > i + 1 ? URLDecoder.decode(pair.substring(i + 1), "UTF-8") : null;
+            String value = i > 0 && pair.length() > i + 1 ? URLDecoder.decode(pair.substring(i + 1), StandardCharsets.UTF_8) : null;
             params.get(key).add(value);
         }
         return params;
@@ -4118,7 +4128,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         setUpClients(clientId, scopes, scopes, GRANT_TYPES, true, redirectUri);
         String username = "authuser" + generator.generate();
         String userScopes = "openid";
-        ScimUser developer = setUpUser(username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
+        ScimUser developer = setUpUser(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, username, userScopes, OriginKeys.UAA, IdentityZoneHolder.get().getId());
         MockHttpSession session = getAuthenticatedSession(developer);
 
         String state = generator.generate();
@@ -4199,7 +4209,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
     private void setAuthentication(MockHttpSession session, ScimUser developer, boolean forcePasswordChange, String... authMethods) {
         UaaPrincipal p = new UaaPrincipal(developer.getId(), developer.getUserName(), developer.getPrimaryEmail(), OriginKeys.UAA, "", IdentityZoneHolder.get().getId());
         UaaAuthentication auth = new UaaAuthentication(p, UaaAuthority.USER_AUTHORITIES, new UaaAuthenticationDetails(false, "clientId", OriginKeys.ORIGIN, "sessionId"));
-        auth.setRequiresPasswordChange(forcePasswordChange);
+        SessionUtils.setPasswordChangeRequired(session, forcePasswordChange);
         auth.setAuthenticationMethods(new HashSet<>(Arrays.asList(authMethods)));
         assertTrue(auth.isAuthenticated());
         SecurityContextHolder.getContext().setAuthentication(auth);
@@ -4217,13 +4227,14 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         IdentityZone testZone = setupIdentityZone(subdomain, defaultUserGroups);
         IdentityZoneHolder.set(testZone);
         IdentityProvider provider = setupIdentityProvider();
-        setUpClients(clientId, scopes, scopes, "password,client_credentials", true, TEST_REDIRECT_URI, Arrays.asList(provider.getOriginKey()));
+        setUpClients(clientId, scopes, scopes, "password,client_credentials", true, TEST_REDIRECT_URI,
+                Collections.singletonList(provider.getOriginKey()));
         setUpUser(username);
         IdentityZoneHolder.clear();
     }
 
     private ResultActions try_token_with_non_post(MockHttpServletRequestBuilder builder, ResultMatcher status) throws Exception {
-        String username = setUpUserForPasswordGrant();
+        String username = createUserForPasswordGrant(jdbcScimUserProvisioning, jdbcScimGroupMembershipManager, jdbcScimGroupProvisioning, generator);
 
         return mockMvc.perform(
                 builder
@@ -4271,7 +4282,8 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         String username = generator.generate() + "@test.org";
         String clientId = "testclient" + generator.generate();
         String scopes = "cloud_controller.read";
-        setUpClients(clientId, scopes, scopes, "password,client_credentials", true, TEST_REDIRECT_URI, Arrays.asList(OriginKeys.UAA));
+        setUpClients(clientId, scopes, scopes, "password,client_credentials", true, TEST_REDIRECT_URI,
+                Collections.singletonList(OriginKeys.UAA));
         setUpUser(username);
 
         MockHttpServletRequestBuilder post = post("/oauth/token")
@@ -4297,7 +4309,7 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
         scimUser.setUserName(username);
         ScimUser.Email email = new ScimUser.Email();
         email.setValue(username);
-        scimUser.setEmails(Arrays.asList(email));
+        scimUser.setEmails(Collections.singletonList(email));
         scimUser.setOrigin(OriginKeys.UAA);
         return jdbcScimUserProvisioning.createUser(scimUser, "secret", IdentityZoneHolder.get().getId());
     }
@@ -4332,22 +4344,22 @@ public class TokenMvcMockTests extends AbstractTokenMockMvcTests {
 
         if (authorizationRequest.getResponseTypes() != null) {
             authorizationRequestMap.put(OAuth2Utils.RESPONSE_TYPE,
-                    Collections.unmodifiableSet(new HashSet<>(authorizationRequest.getResponseTypes())));
+                    Set.copyOf(authorizationRequest.getResponseTypes()));
         }
         if (authorizationRequest.getScope() != null) {
             authorizationRequestMap.put(OAuth2Utils.SCOPE,
-                    Collections.unmodifiableSet(new HashSet<>(authorizationRequest.getScope())));
+                    Set.copyOf(authorizationRequest.getScope()));
         }
 
         authorizationRequestMap.put("approved", authorizationRequest.isApproved());
 
         if (authorizationRequest.getResourceIds() != null) {
             authorizationRequestMap.put("resourceIds",
-                    Collections.unmodifiableSet(new HashSet<String>(authorizationRequest.getResourceIds())));
+                    Set.copyOf(authorizationRequest.getResourceIds()));
         }
         if (authorizationRequest.getAuthorities() != null) {
             authorizationRequestMap.put("authorities",
-                    Collections.unmodifiableSet(new HashSet<GrantedAuthority>(authorizationRequest.getAuthorities())));
+                    Set.<GrantedAuthority>copyOf(authorizationRequest.getAuthorities()));
         }
 
         return authorizationRequestMap;

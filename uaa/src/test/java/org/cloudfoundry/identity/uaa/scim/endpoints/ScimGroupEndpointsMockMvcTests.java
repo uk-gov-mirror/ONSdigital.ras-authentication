@@ -478,7 +478,8 @@ public class ScimGroupEndpointsMockMvcTests {
 
         String zonedClientId = "zonedClientId";
         String zonedClientSecret = "zonedClientSecret";
-        BaseClientDetails zonedClientDetails = (BaseClientDetails) MockMvcUtils.createClient(mockMvc, result.getZoneAdminToken(), zonedClientId, zonedClientSecret, Collections.singleton("oauth"), Arrays.asList("scim.read"), Arrays.asList("client_credentials", "password"), "scim.read", null, result.getIdentityZone());
+        BaseClientDetails zonedClientDetails = (BaseClientDetails) MockMvcUtils.createClient(mockMvc, result.getZoneAdminToken(), zonedClientId, zonedClientSecret, Collections.singleton("oauth"),
+                Collections.singletonList("scim.read"), Arrays.asList("client_credentials", "password"), "scim.read", null, result.getIdentityZone());
         zonedClientDetails.setClientSecret(zonedClientSecret);
 
         ScimUser zoneUser = createUserAndAddToGroups(result.getIdentityZone(), Sets.newHashSet(Collections.singletonList("scim.read")));
@@ -1311,7 +1312,7 @@ public class ScimGroupEndpointsMockMvcTests {
         validateMembers(defaultExternalMembers, members.getResources());
     }
 
-    String getGroupId(String displayName) throws Exception {
+    String getGroupId(String displayName) {
         JdbcScimGroupProvisioning gp = (JdbcScimGroupProvisioning) webApplicationContext.getBean("scimGroupProvisioning");
         List<ScimGroup> result = gp.query("displayName eq \"" + displayName + "\"", IdentityZoneHolder.get().getId());
         if (result == null || result.size() == 0) {
@@ -1358,7 +1359,7 @@ public class ScimGroupEndpointsMockMvcTests {
         }
     }
 
-    private ScimUser createUserAndAddToGroups(IdentityZone zone, Set<String> groupNames) throws Exception {
+    private ScimUser createUserAndAddToGroups(IdentityZone zone, Set<String> groupNames) {
         if (zone == null) {
             zone = IdentityZone.getUaa();
         }
@@ -1395,7 +1396,7 @@ public class ScimGroupEndpointsMockMvcTests {
                 ScimGroupMember member = new ScimGroupMember(user.getId(), ScimGroupMember.Type.USER);
                 try {
                     scimGroupMembershipManager.addMember(group.getId(), member, IdentityZoneHolder.get().getId());
-                } catch (MemberAlreadyExistsException x) {
+                } catch (MemberAlreadyExistsException ignored) {
                 }
             }
         } finally {
@@ -1404,7 +1405,7 @@ public class ScimGroupEndpointsMockMvcTests {
         return user;
     }
 
-    private ScimGroup createGroupWithinGroups(IdentityZone zone, Set<String> groupNames) throws Exception {
+    private ScimGroup createGroupWithinGroups(IdentityZone zone, Set<String> groupNames) {
         if (zone == null) {
             zone = IdentityZone.getUaa();
         }
@@ -1436,7 +1437,7 @@ public class ScimGroupEndpointsMockMvcTests {
                 ScimGroupMember member = new ScimGroupMember(newGroup.getId(), ScimGroupMember.Type.GROUP);
                 try {
                     scimGroupMembershipManager.addMember(group.getId(), member, IdentityZoneHolder.get().getId());
-                } catch (MemberAlreadyExistsException x) {
+                } catch (MemberAlreadyExistsException ignored) {
                 }
             }
         } finally {

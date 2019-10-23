@@ -94,6 +94,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -126,10 +127,7 @@ public class LoginInfoEndpoint {
     public static final String LINK_CREATE_ACCOUNT_SHOW = "linkCreateAccountShow";
     public static final String FIELD_USERNAME_SHOW = "fieldUsernameShow";
 
-    public static final List<String> UI_ONLY_ATTRIBUTES =
-            Collections.unmodifiableList(
-                    Arrays.asList(CREATE_ACCOUNT_LINK, FORGOT_PASSWORD_LINK, LINK_CREATE_ACCOUNT_SHOW, FIELD_USERNAME_SHOW)
-            );
+    public static final List<String> UI_ONLY_ATTRIBUTES = List.of(CREATE_ACCOUNT_LINK, FORGOT_PASSWORD_LINK, LINK_CREATE_ACCOUNT_SHOW, FIELD_USERNAME_SHOW);
     public static final String PASSCODE = "passcode";
     public static final String SHOW_LOGIN_LINKS = "showLoginLinks";
     public static final String LINKS = "links";
@@ -274,8 +272,7 @@ public class LoginInfoEndpoint {
     }
 
     private static <T extends SavedAccountOption> List<T> getSavedAccounts(Cookie[] cookies, Class<T> clazz) {
-        return Arrays.asList(ofNullable(cookies).orElse(new Cookie[]{}))
-                .stream()
+        return Arrays.stream(ofNullable(cookies).orElse(new Cookie[]{}))
                 .filter(c -> c.getName().startsWith("Saved-Account"))
                 .map(c -> {
                     try {
@@ -284,7 +281,7 @@ public class LoginInfoEndpoint {
                         return null;
                     }
                 })
-                .filter(c -> c != null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
@@ -339,7 +336,7 @@ public class LoginInfoEndpoint {
             ldapIdentityProvider = providerProvisioning.retrieveByOrigin(
                     OriginKeys.LDAP, IdentityZoneHolder.get().getId()
             );
-        } catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException ignored) {
         }
         IdentityProvider uaaIdentityProvider =
                 providerProvisioning.retrieveByOriginIgnoreActiveFlag(OriginKeys.UAA, IdentityZoneHolder.get().getId());
@@ -544,20 +541,19 @@ public class LoginInfoEndpoint {
                 ofNullable(session)
                         .flatMap(s -> ofNullable((SavedRequest) s.getAttribute(SAVED_REQUEST_SESSION_ATTRIBUTE)))
                         .flatMap(sr -> ofNullable(sr.getParameterValues("login_hint")))
-                        .flatMap(lhValues -> Arrays.asList(lhValues).stream().findFirst())
+                        .flatMap(lhValues -> Arrays.stream(lhValues).findFirst())
                         .orElse(request.getParameter("login_hint"));
 
         if (loginHintParam != null) {
-            String loginHint = loginHintParam;
             // parse login_hint in JSON format
-            UaaLoginHint uaaLoginHint = UaaLoginHint.parseRequestParameter(loginHint);
+            UaaLoginHint uaaLoginHint = UaaLoginHint.parseRequestParameter(loginHintParam);
             if (uaaLoginHint != null) {
-                logger.debug("Received login hint: " + loginHint);
+                logger.debug("Received login hint: " + loginHintParam);
                 logger.debug("Received login hint with origin: " + uaaLoginHint.getOrigin());
                 if (OriginKeys.UAA.equals(uaaLoginHint.getOrigin()) || OriginKeys.LDAP.equals(uaaLoginHint.getOrigin())) {
                     if (allowedIdentityProviderKeys == null || allowedIdentityProviderKeys.contains(uaaLoginHint.getOrigin())) {
                         // in case of uaa/ldap, pass value to login page
-                        model.addAttribute("login_hint", loginHint);
+                        model.addAttribute("login_hint", loginHintParam);
                         samlIdentityProviders.clear();
                         oauthIdentityProviders.clear();
                     } else {
@@ -586,7 +582,8 @@ public class LoginInfoEndpoint {
                 // login_hint in JSON format was not available, try old format (email domain)
                 List<Map.Entry<String, AbstractIdentityProviderDefinition>> matchingIdentityProviders =
                         allIdentityProviders.entrySet().stream().filter(
-                                idp -> ofNullable(idp.getValue().getEmailDomain()).orElse(Collections.emptyList()).contains(loginHint)
+                                idp -> ofNullable(idp.getValue().getEmailDomain()).orElse(Collections.emptyList()).contains(
+                                        loginHintParam)
                         ).collect(Collectors.toList());
                 if (matchingIdentityProviders.size() > 1) {
                     throw new IllegalStateException(
@@ -617,17 +614,14 @@ public class LoginInfoEndpoint {
                 String url = SamlRedirectUtils.getIdpRedirectUrl((SamlIdentityProviderDefinition) idpForRedirect, entityID, IdentityZoneHolder.get());
                 return "redirect:/" + url;
             } else if (idpForRedirect instanceof AbstractXOAuthIdentityProviderDefinition) {
-                try {
-                    String redirectUrl = getRedirectUrlForXOAuthIDP(request, alias, (AbstractXOAuthIdentityProviderDefinition) idpForRedirect);
-                    return "redirect:" + redirectUrl;
-                } catch (UnsupportedEncodingException e) {
-                }
+                String redirectUrl = getRedirectUrlForXOAuthIDP(request, alias, (AbstractXOAuthIdentityProviderDefinition) idpForRedirect);
+                return "redirect:" + redirectUrl;
             }
         }
         return null;
     }
 
-    private String getRedirectUrlForXOAuthIDP(HttpServletRequest request, String alias, AbstractXOAuthIdentityProviderDefinition definition) throws UnsupportedEncodingException {
+    private String getRedirectUrlForXOAuthIDP(HttpServletRequest request, String alias, AbstractXOAuthIdentityProviderDefinition definition) {
         return xoAuthProviderConfigurator.getCompleteAuthorizationURI(alias, UaaUrlUtils.getBaseURL(request), definition);
     }
 
@@ -641,10 +635,9 @@ public class LoginInfoEndpoint {
         List<IdentityProvider> identityProviders =
                 xoAuthProviderConfigurator.retrieveAll(true, IdentityZoneHolder.get().getId());
 
-        Map<String, AbstractXOAuthIdentityProviderDefinition> identityProviderDefinitions = identityProviders.stream()
+        return identityProviders.stream()
                 .filter(p -> allowedIdps == null || allowedIdps.contains(p.getOriginKey()))
                 .collect(idpsMapCollector);
-        return identityProviderDefinitions;
     }
 
     protected boolean hasSavedOauthAuthorizeRequest(HttpSession session) {
@@ -654,10 +647,7 @@ public class LoginInfoEndpoint {
         SavedRequest savedRequest = (SavedRequest) session.getAttribute(SAVED_REQUEST_SESSION_ATTRIBUTE);
         String redirectUrl = savedRequest.getRedirectUrl();
         String[] client_ids = savedRequest.getParameterValues("client_id");
-        if (redirectUrl != null && redirectUrl.contains("/oauth/authorize") && client_ids != null && client_ids.length != 0) {
-            return true;
-        }
-        return false;
+        return redirectUrl != null && redirectUrl.contains("/oauth/authorize") && client_ids != null && client_ids.length != 0;
     }
 
     public Map<String, Object> getClientInfo(HttpSession session) {
@@ -727,7 +717,7 @@ public class LoginInfoEndpoint {
             IdentityProvider providerForOrigin = null;
             try {
                 providerForOrigin = providerProvisioning.retrieveByOrigin(origin, IdentityZoneHolder.get().getId());
-            } catch (DataAccessException e) {
+            } catch (DataAccessException ignored) {
             }
             if (providerForOrigin != null) {
                 if (providerForOrigin.getConfig() instanceof OIDCIdentityProviderDefinition) {
@@ -792,7 +782,7 @@ public class LoginInfoEndpoint {
             String[] client_ids = savedRequest.getParameterValues("client_id");
             try {
                 clientDetails = clientDetailsService.loadClientByClientId(client_ids[0], IdentityZoneHolder.get().getId());
-            } catch (NoSuchClientException e) {
+            } catch (NoSuchClientException ignored) {
             }
         }
         if (StringUtils.hasText(loginHint)) {

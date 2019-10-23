@@ -36,7 +36,7 @@ public class AccessControllerTests {
     private AccessController controller = new AccessController();
 
     @Test
-    public void testSunnyDay() throws Exception {
+    public void testSunnyDay() {
         InMemoryMultitenantClientServices clientDetailsService = new InMemoryMultitenantClientServices(null);
         clientDetailsService.setClientDetailsStore(IdentityZoneHolder.get().getId(), Collections.singletonMap("client", new BaseClientDetails()));
         controller.setClientDetailsService(clientDetailsService);
@@ -49,7 +49,7 @@ public class AccessControllerTests {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testSchemePreserved() throws Exception {
+    public void testSchemePreserved() {
         InMemoryMultitenantClientServices clientDetailsService = new InMemoryMultitenantClientServices(null);
         clientDetailsService.setClientDetailsStore(IdentityZoneHolder.get().getId(), Collections.singletonMap("client", new BaseClientDetails()));
         controller.setClientDetailsService(clientDetailsService);
@@ -67,7 +67,7 @@ public class AccessControllerTests {
     }
 
     @Test
-    public void testClientDisplayName() throws Exception {
+    public void testClientDisplayName() {
         InMemoryMultitenantClientServices clientDetailsService = new InMemoryMultitenantClientServices(null);
         BaseClientDetails client = new BaseClientDetails();
         client.addAdditionalInformation(ClientConstants.CLIENT_NAME, "The Client Name");
@@ -93,10 +93,10 @@ public class AccessControllerTests {
 
     @Test
     public void approvedScopes_doNotShowUpForApproval_ifAutoApprovedHasTrue() throws Exception {
-        performAutoApprovedScopeTest(Arrays.asList("true"));
+        performAutoApprovedScopeTest(Collections.singletonList("true"));
     }
 
-    private void performAutoApprovedScopeTest(List<String> autoApprovedScopes) throws Exception {
+    private void performAutoApprovedScopeTest(List<String> autoApprovedScopes) {
         InMemoryMultitenantClientServices clientDetailsService = new InMemoryMultitenantClientServices(null);
         BaseClientDetails client = new BaseClientDetails();
         client.addAdditionalInformation(ClientConstants.CLIENT_NAME, "The Client Name");
@@ -108,8 +108,8 @@ public class AccessControllerTests {
         ScimGroup scimGroup1 = new ScimGroup("resource.scope1");
         ScimGroup scimGroup2 = new ScimGroup("resource.scope2");
         when(provisioning.query(any(), any()))
-            .thenReturn(new ArrayList<>(Arrays.asList(scimGroup1)))
-            .thenReturn(new ArrayList<>(Arrays.asList(scimGroup2)));
+            .thenReturn(new ArrayList<>(Collections.singletonList(scimGroup1)))
+            .thenReturn(new ArrayList<>(Collections.singletonList(scimGroup2)));
         controller.setClientDetailsService(clientDetailsService);
         controller.setGroupProvisioning(provisioning);
 
