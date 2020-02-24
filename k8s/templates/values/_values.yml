@@ -1,0 +1,24 @@
+#@data/values
+---
+version: ""
+image: ""
+labels:
+  instance: standalone
+  partOf: uaa
+  managedBy: kapp
+
+tomcat:
+  accessLoggingEnabled: "y"
+
+database:
+  scheme: hsqldb
+  address: ~
+  port: ~
+  name: ~
+  username: sa
+  password: password
+
+jwt:
+  policy:
+    activeKeyId: ~
+    keys: []

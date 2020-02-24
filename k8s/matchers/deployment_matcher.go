@@ -1,4 +1,4 @@
-package k8s_test
+package matchers
 
 import (
 	"fmt"
@@ -10,17 +10,24 @@ import (
 type PodMatcherConfig func(*PodMatcher)
 
 type DeploymentMatcher struct {
-	pod *PodMatcher
+	pod  *PodMatcher
+	meta *ObjectMetaMatcher
 
 	executed types.GomegaMatcher
 }
 
 func RepresentingDeployment() *DeploymentMatcher {
-	return &DeploymentMatcher{NewPodMatcher(), nil}
+	return &DeploymentMatcher{NewPodMatcher(), NewObjectMetaMatcher(), nil}
 }
 
 func (matcher *DeploymentMatcher) WithPodMatching(config PodMatcherConfig) *DeploymentMatcher {
 	config(matcher.pod)
+
+	return matcher
+}
+
+func (matcher *DeploymentMatcher) WithLabels(labels map[string]string) *DeploymentMatcher {
+	matcher.meta.WithLabels(labels)
 
 	return matcher
 }
@@ -31,8 +38,13 @@ func (matcher *DeploymentMatcher) Match(actual interface{}) (bool, error) {
 		return false, fmt.Errorf("Expected a deployment. Got\n%s", format.Object(actual, 1))
 	}
 
-	matcher.executed = matcher.pod
+	matcher.executed = matcher.pod // so we can have good pod-specific failure messages
 	if pass, err := matcher.pod.Match(deployment.Spec.Template); !pass || err != nil {
+		return pass, err
+	}
+
+	matcher.executed = matcher.meta
+	if pass, err := matcher.meta.Match(deployment.ObjectMeta); !pass || err != nil {
 		return pass, err
 	}
 
