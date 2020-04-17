@@ -1250,6 +1250,46 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>com.icegreen</groupId>
+      <artifactId>greenmail</artifactId>
+      <version>1.5.11</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>jsonassert</artifactId>
+          <groupId>org.skyscreamer</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hamcrest-all</artifactId>
+          <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hamcrest-library</artifactId>
+          <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>spring-boot-starter-logging</artifactId>
+          <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>android-json</artifactId>
+          <groupId>com.vaadin.external.google</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hamcrest-core</artifactId>
+          <groupId>org.hamcrest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>apacheds-core</artifactId>
+          <groupId>org.apache.directory.server</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>apacheds-protocol-ldap</artifactId>
+          <groupId>org.apache.directory.server</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>

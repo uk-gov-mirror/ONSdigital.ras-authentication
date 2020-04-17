@@ -11,20 +11,6 @@ import (
 	"os/exec"
 )
 
-type RenderingContext struct {
-	templates []string
-	data      map[string]string
-}
-
-func (r RenderingContext) WithData(data map[string]string) RenderingContext {
-	r.data = data
-	return r
-}
-
-func NewRenderingContext(templates ...string) RenderingContext {
-	return RenderingContext{templates, nil}
-}
-
 type ProduceYAMLMatcher struct {
 	matcher  types.GomegaMatcher
 	rendered string
@@ -41,8 +27,8 @@ func (matcher *ProduceYAMLMatcher) Match(actual interface{}) (bool, error) {
 	}
 
 	session, err := renderWithData(rendering.templates, rendering.data)
-	if err != nil {
-		return false, err
+	if err != nil || session.ExitCode() != 0 {
+		return false, fmt.Errorf("render error, exit status={%v}, command={%s}, error={%v}", session.ExitCode(), session.Command, err)
 	}
 
 	matcher.rendered = string(session.Out.Contents())
