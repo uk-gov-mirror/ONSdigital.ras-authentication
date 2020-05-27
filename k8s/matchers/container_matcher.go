@@ -48,8 +48,12 @@ func (matcher *ContainerMatcher) WithImageContaining(image string) *ContainerMat
 }
 
 func (matcher *ContainerMatcher) WithEnvVar(name, value string) *ContainerMatcher {
+	return matcher.WithEnvVarMatching(name, Equal(value))
+}
+
+func (matcher *ContainerMatcher) WithEnvVarMatching(name string, envVarMatcher types.GomegaMatcher) *ContainerMatcher {
 	matcher.envVars[name] = MatchFields(IgnoreExtras, Fields{
-		"Value": Equal(value),
+		"Value": envVarMatcher,
 	})
 
 	return matcher
@@ -87,7 +91,7 @@ func (matcher *ContainerMatcher) Match(actual interface{}) (bool, error) {
 	identifyVolumeMountByName := func(element interface{}) string {
 		return element.(coreV1.VolumeMount).Name
 	}
-	matcher.fields["VolumeMounts"] = MatchElements(identifyVolumeMountByName, 0, matcher.volumeMounts)
+	matcher.fields["VolumeMounts"] = MatchElements(identifyVolumeMountByName, IgnoreExtras, matcher.volumeMounts)
 
 	matcher.executed = MatchFields(IgnoreExtras, matcher.fields)
 	return matcher.executed.Match(container)

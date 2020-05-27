@@ -1,5 +1,5 @@
 #@ load("@ytt:data", "data")
-#@ load("uaa.lib.star", "signing_keys", "database_connection_string")
+#@ load("uaa.lib.star", "database_connection_string")
 #@ def config():
 ---
 issuer:
@@ -8,8 +8,8 @@ issuer:
 encryption:
   active_key_label: CHANGE-THIS-KEY
   encryption_keys:
-  - label: CHANGE-THIS-KEY
-    passphrase: CHANGEME
+    - label: CHANGE-THIS-KEY
+      passphrase: CHANGEME
 
 login:
   serviceProviderKey: |
@@ -54,10 +54,6 @@ login:
 #! The secret that an external login server will use to authenticate to the uaa using the id `login`
 LOGIN_SECRET: loginsecret
 
-jwt:
-  token:
-    policy: #@ signing_keys(data.values.jwt.policy)
-
 database:
   maxactive: 100
   maxidle: 10
@@ -72,4 +68,13 @@ smtp:
   port: #@ data.values.smtp.port
   starttls: #@ data.values.smtp.starttls
   from_address: #@ data.values.smtp.from_address
+
+oauth:
+  client:
+    override: true
+  clients:
+    admin:
+      authorized-grant-types: client_credentials
+      authorities: "clients.read,clients.write,clients.secret,uaa.admin,scim.read,scim.write,password.write"
+
 #@ end

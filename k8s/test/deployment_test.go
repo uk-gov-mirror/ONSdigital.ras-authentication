@@ -23,6 +23,26 @@ var _ = Describe("Deployment", func() {
 		"ReadOnly":  Equal(true),
 	})
 
+	adminCredentialsVolumeMountMatcher := gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+		"Name":      Equal("admin-client-credentials-file"),
+		"MountPath": Equal("/etc/secrets/admin_client_credentials.yml"),
+		"SubPath":   Equal("admin_client_credentials.yml"),
+		"ReadOnly":  Equal(true),
+	})
+
+	jwtTokensVolumeMountMatcher := gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+		"Name":      Equal("jwt-policy-signing-keys-file"),
+		"MountPath": Equal("/etc/secrets/jwt_policy_signing_keys.yml"),
+		"SubPath":   Equal("jwt_policy_signing_keys.yml"),
+		"ReadOnly":  Equal(true),
+	})
+
+	truststoreVolumeMountMatcher := gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+		"Name":      Equal("truststore-file"),
+		"MountPath": Equal("/etc/truststore"),
+		"ReadOnly":  Equal(true),
+	})
+
 	BeforeEach(func() {
 		templates = []string{
 			pathToFile("deployment.yml"),
@@ -30,11 +50,23 @@ var _ = Describe("Deployment", func() {
 			pathToFile(filepath.Join("values", "image.yml")),
 			pathToFile(filepath.Join("values", "version.yml")),
 			pathToFile("deployment.star"),
+			"secrets/ca_certs.star=" + pathToFile(filepath.Join("secrets", "ca_certs.star")),
 		}
 	})
 
 	It("Renders a deployment for the UAA", func() {
 		ctx := NewRenderingContext(templates...)
+
+		expectedJavaOpts := "" +
+			"-Dspring_profiles=hsqldb " +
+			"-Djava.security.egd=file:/dev/./urandom " +
+			"-Dlogging.config=/etc/config/log4j2.properties " +
+			"-Dlog4j.configurationFile=/etc/config/log4j2.properties " +
+			"-DCLOUDFOUNDRY_CONFIG_PATH=/etc/config " +
+			"-DSECRETS_DIR=/etc/secrets " +
+			"-Djavax.net.ssl.trustStore=/etc/truststore/uaa.pkcs12.truststore " +
+			"-Djavax.net.ssl.trustStoreType=PKCS12 " +
+			"-Djavax.net.ssl.trustStorePassword=changeit"
 
 		Expect(ctx).To(
 			ProduceYAML(
@@ -43,19 +75,22 @@ var _ = Describe("Deployment", func() {
 					pod.WithContainerMatching(func(container *ContainerMatcher) {
 						container.WithName("uaa")
 						container.WithImageContaining("cfidentity/uaa@sha256:")
-						container.WithEnvVar("spring_profiles", "default,hsqldb")
-						container.WithEnvVar("CLOUDFOUNDRY_CONFIG_PATH", "/etc/config")
 						container.WithEnvVar("BPL_TOMCAT_ACCESS_LOGGING", "y")
-						container.WithEnvVar("JAVA_OPTS", "-Djava.security.egd=file:/dev/./urandom -Dlogging.config=/etc/config/log4j2.properties -Dlog4j.configurationFile=/etc/config/log4j2.properties")
-						container.WithEnvVar("SECRETS_DIR", "/etc/secrets")
+						container.WithEnvVar("JAVA_OPTS", expectedJavaOpts)
 						container.WithVolumeMount("uaa-config", Not(BeNil()))
 						container.WithVolumeMount("database-credentials-file", databaseVolumeMountMatcher)
 						container.WithVolumeMount("smtp-credentials-file", smtpVolumeMountMatcher)
+						container.WithVolumeMount("admin-client-credentials-file", adminCredentialsVolumeMountMatcher)
+						container.WithVolumeMount("jwt-policy-signing-keys-file", jwtTokensVolumeMountMatcher)
+						container.WithVolumeMount("truststore-file", truststoreVolumeMountMatcher)
 						container.WithResourceRequests("512Mi", "500m")
 					})
 					pod.WithVolume("uaa-config", Not(BeNil()))
 					pod.WithVolume("database-credentials-file", Not(BeNil()))
 					pod.WithVolume("smtp-credentials-file", Not(BeNil()))
+					pod.WithVolume("admin-client-credentials-file", Not(BeNil()))
+					pod.WithVolume("jwt-policy-signing-keys-file", Not(BeNil()))
+					pod.WithVolume("truststore-file", Not(BeNil()))
 				}),
 			),
 		)
@@ -71,13 +106,7 @@ var _ = Describe("Deployment", func() {
 					pod.WithContainerMatching(func(container *ContainerMatcher) {
 						container.WithName("uaa")
 						container.WithImage("image from testing")
-						container.WithVolumeMount("uaa-config", Not(BeNil()))
-						container.WithVolumeMount("database-credentials-file", databaseVolumeMountMatcher)
-						container.WithVolumeMount("smtp-credentials-file", smtpVolumeMountMatcher)
 					})
-					pod.WithVolume("uaa-config", Not(BeNil()))
-					pod.WithVolume("database-credentials-file", Not(BeNil()))
-					pod.WithVolume("smtp-credentials-file", Not(BeNil()))
 				}),
 			),
 		)
@@ -96,13 +125,7 @@ var _ = Describe("Deployment", func() {
 					pod.WithContainerMatching(func(container *ContainerMatcher) {
 						container.WithName("uaa")
 						container.WithResourceRequests("888Mi", "999m")
-						container.WithVolumeMount("uaa-config", Not(BeNil()))
-						container.WithVolumeMount("database-credentials-file", databaseVolumeMountMatcher)
-						container.WithVolumeMount("smtp-credentials-file", smtpVolumeMountMatcher)
 					})
-					pod.WithVolume("uaa-config", Not(BeNil()))
-					pod.WithVolume("database-credentials-file", Not(BeNil()))
-					pod.WithVolume("smtp-credentials-file", Not(BeNil()))
 				}),
 			),
 		)
@@ -129,14 +152,8 @@ var _ = Describe("Deployment", func() {
 					RepresentingDeployment().WithPodMatching(func(pod *PodMatcher) {
 						pod.WithContainerMatching(func(container *ContainerMatcher) {
 							container.WithName("uaa")
-							container.WithEnvVar("spring_profiles", databaseScheme)
-							container.WithVolumeMount("uaa-config", Not(BeNil()))
-							container.WithVolumeMount("database-credentials-file", databaseVolumeMountMatcher)
-							container.WithVolumeMount("smtp-credentials-file", smtpVolumeMountMatcher)
+							container.WithEnvVarMatching("JAVA_OPTS", ContainSubstring("-Dspring_profiles=postgresql"))
 						})
-						pod.WithVolume("uaa-config", Not(BeNil()))
-						pod.WithVolume("database-credentials-file", Not(BeNil()))
-						pod.WithVolume("smtp-credentials-file", Not(BeNil()))
 					}),
 				),
 			)
@@ -163,9 +180,6 @@ var _ = Describe("Deployment", func() {
 				WithNamespace("default").
 				WithPodMatching(func(pod *PodMatcher) {
 					pod.WithLabels(labels)
-					pod.WithVolume("uaa-config", Not(BeNil()))
-					pod.WithVolume("database-credentials-file", Not(BeNil()))
-					pod.WithVolume("smtp-credentials-file", Not(BeNil()))
 				}),
 			),
 		)
