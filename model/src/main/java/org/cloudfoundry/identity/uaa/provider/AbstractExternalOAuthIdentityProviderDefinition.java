@@ -39,6 +39,7 @@ public abstract class AbstractExternalOAuthIdentityProviderDefinition<T extends 
 
     private XOAuthIssuerValidationMode issuerValidationMode = XOAuthIssuerValidationMode.STRICT;
     private String responseType = "code";
+    private String userPropagationParameter;
 
     public URL getAuthUrl() {
         return authUrl;
@@ -165,6 +166,15 @@ public abstract class AbstractExternalOAuthIdentityProviderDefinition<T extends 
         return (T) this;
     }
 
+    public String getUserPropagationParameter() {
+        return userPropagationParameter;
+    }
+
+    public T setUserPropagationParameter(String userPropagationParameter) {
+        this.userPropagationParameter = userPropagationParameter;
+        return (T) this;
+    }
+
     @JsonIgnore
     public Class getParameterizedClass() {
         ParameterizedType parameterizedType =
@@ -193,7 +203,7 @@ public abstract class AbstractExternalOAuthIdentityProviderDefinition<T extends 
             return false;
         if (!Objects.equals(scopes, that.scopes)) return false;
         if (!Objects.equals(issuer, that.issuer)) return false;
-        if (!Objects.equals(issuerValidationMode, that.issuerValidationMode)) return false;
+        if (!Objects.equals(userPropagationParameter, that.userPropagationParameter)) return false;
         return Objects.equals(responseType, that.responseType);
 
     }
@@ -212,7 +222,7 @@ public abstract class AbstractExternalOAuthIdentityProviderDefinition<T extends 
         result = 31 * result + (relyingPartySecret != null ? relyingPartySecret.hashCode() : 0);
         result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
         result = 31 * result + (issuer != null ? issuer.hashCode() : 0);
-        result = 31 * result + (issuerValidationMode != null ? issuerValidationMode.hashCode() : 0);
+        result = 31 * result + (userPropagationParameter != null ? userPropagationParameter.hashCode() : 0);
         result = 31 * result + (responseType != null ? responseType.hashCode() : 0);
         return result;
     }

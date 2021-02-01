@@ -27,6 +27,7 @@ var _ = Describe("Metadata", func() {
 			"labels.managedBy": "managedBy-from-test",
 			"version":          "version-from-test",
 			"namespace":        "namespace-from-test",
+			"database.scheme":  "hsqldb",
 		})
 
 		labels := map[string]string{
@@ -41,11 +42,15 @@ var _ = Describe("Metadata", func() {
 		Expect(ctx).To(
 			ProduceYAML(
 				RepresentingDeployment().
-					WithLabels(labels).
-					WithNamespace("namespace-from-test").
+					WithMetaMatching(func(metadata *ObjectMetaMatcher) {
+						metadata.WithLabels(labels)
+						metadata.WithNamespace("namespace-from-test")
+					}).
 					WithPodMatching(func(pod *PodMatcher) {
-						pod.WithLabels(labels)
-						pod.WithNamespace("namespace-from-test")
+						pod.WithMetaMatching(func(metadata *ObjectMetaMatcher) {
+							metadata.WithLabels(labels)
+							metadata.WithNamespace("namespace-from-test")
+						})
 					}),
 			),
 		)

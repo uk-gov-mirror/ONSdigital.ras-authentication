@@ -125,6 +125,7 @@ public class OauthIDPWrapperFactoryBean {
 
         idpDefinition.setAttributeMappings((Map<String, Object>) idpDefinitionMap.get(ATTRIBUTE_MAPPINGS));
         idpDefinition.setScopes((List<String>) idpDefinitionMap.get("scopes"));
+        idpDefinition.setUserPropagationParameter((String) idpDefinitionMap.get("userPropagationParameter"));
         String responseType = (String) idpDefinitionMap.get("responseType");
         if (hasText(responseType)) {
             idpDefinition.setResponseType(responseType);
